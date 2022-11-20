@@ -165,6 +165,39 @@ class Scanner
 		AddToken(type);
 	}
 
+	private void ScanBlockComment()
+	{
+		var depth = 0;
+
+        while (!IsAtEnd())
+		{
+            var c = Advance();
+            switch (c)
+            {
+                case '/':
+                    if (Match('*'))
+                    {
+                        depth++;
+                    }
+                    break;
+                case '*':
+                    if (Match('/'))
+                    {
+                        if (depth == 0)
+                        {
+                            return;
+                        }
+                        depth--;
+                    }
+                    break;
+                case '\n':
+                    line++;
+                    break;
+            }
+        }
+		Lox.Error(line, "Unclosed block comment");
+    }
+
     private void ScanToken()
 	{
 		char c = Advance();
@@ -183,6 +216,15 @@ class Scanner
 			case '!':
 				AddToken(Match('=') ? BANG_EQUAL : BANG);
 				break;
+			case '=':
+				AddToken(Match('=') ? EQUAL_EQUAL : EQUAL);
+				break;
+			case '<':
+				AddToken(Match('=') ? LESS_EQUAL : LESS);
+				break;
+			case '>':
+				AddToken(Match('=') ? GREATER_EQUAL : GREATER);
+				break;
 			case '/':
 				if (Match('/'))
 				{
@@ -192,6 +234,10 @@ class Scanner
 						Advance();
 					}
                 }
+				else if (Match('*'))
+				{
+					ScanBlockComment();
+				}
 				else
 				{
 					AddToken(SLASH);
