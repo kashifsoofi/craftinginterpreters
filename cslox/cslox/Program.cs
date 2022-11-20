@@ -17,8 +17,7 @@ class Lox
         }
         else
         {
-            // RunPrompt();
-            Console.WriteLine("RunPrompt");
+            RunPrompt();
         }
 
         if (hadError)
