@@ -168,10 +168,9 @@ class Scanner
 	private void ScanBlockComment()
 	{
 		var depth = 0;
-
-        while (!IsAtEnd())
+		while (!IsAtEnd())
 		{
-            var c = Advance();
+			var c = Advance();
             switch (c)
             {
                 case '/':
