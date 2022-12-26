@@ -1,5 +1,4 @@
 ﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
 var outputDir = "../../../../cslox/Parser";
 var types = new Dictionary<string, string[]>
 {
@@ -23,12 +22,15 @@ static void DefineAst(string outputDir, string baseName, Dictionary<string, stri
 
     writer.WriteLine($"abstract class {baseName}");
     writer.WriteLine("{");
+    writer.WriteLine("\tpublic abstract T Accept<T>(IVisitor<T> visitor);");
     writer.WriteLine("}");
 
     foreach (var (className, fields) in types)
     {
         DefineType(writer, baseName, className, fields);
     }
+
+    DefineVisitor(writer, baseName, types);
 }
 
 static void DefineType(StreamWriter writer, string baseName, string className, string[] fields)
@@ -72,6 +74,23 @@ static void DefineType(StreamWriter writer, string baseName, string className, s
     foreach (var field in fields)
     {
         writer.WriteLine($"\tpublic {field} {{ get; }}");
+    }
+    writer.WriteLine("");
+    writer.WriteLine("\tpublic override T Accept<T>(IVisitor<T> visitor)");
+    writer.WriteLine("\t{");
+    writer.WriteLine($"\t\treturn visitor.Visit{className}{baseName}(this);");
+    writer.WriteLine("\t}");
+    writer.WriteLine("}");
+}
+
+static void DefineVisitor(StreamWriter writer, string baseName, Dictionary<string, string[]> types)
+{
+    writer.WriteLine("");
+    writer.WriteLine("interface IVisitor<T>");
+    writer.WriteLine("{");
+    foreach (var (typeName, fields) in types)
+    {
+        writer.WriteLine($"\tT Visit{typeName}{baseName}({typeName} {baseName.ToLower()});");
     }
     writer.WriteLine("}");
 }

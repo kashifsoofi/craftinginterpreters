@@ -4,6 +4,7 @@ namespace cslox.Parser;
 
 abstract class Expression
 {
+	public abstract T Accept<T>(IVisitor<T> visitor);
 }
 
 class Binary : Expression
@@ -18,6 +19,11 @@ class Binary : Expression
 	public Expression Left { get; }
 	public Token Operator { get; }
 	public Expression Right { get; }
+
+	public override T Accept<T>(IVisitor<T> visitor)
+	{
+		return visitor.VisitBinaryExpression(this);
+	}
 }
 
 class Grouping : Expression
@@ -28,6 +34,11 @@ class Grouping : Expression
 	}
 
 	public Expression Expression { get; }
+
+	public override T Accept<T>(IVisitor<T> visitor)
+	{
+		return visitor.VisitGroupingExpression(this);
+	}
 }
 
 class Literal : Expression
@@ -38,6 +49,11 @@ class Literal : Expression
 	}
 
 	public object Value { get; }
+
+	public override T Accept<T>(IVisitor<T> visitor)
+	{
+		return visitor.VisitLiteralExpression(this);
+	}
 }
 
 class Unary : Expression
@@ -50,4 +66,17 @@ class Unary : Expression
 
 	public Token Operator { get; }
 	public Expression Right { get; }
+
+	public override T Accept<T>(IVisitor<T> visitor)
+	{
+		return visitor.VisitUnaryExpression(this);
+	}
+}
+
+interface IVisitor<T>
+{
+	T VisitBinaryExpression(Binary expression);
+	T VisitGroupingExpression(Grouping expression);
+	T VisitLiteralExpression(Literal expression);
+	T VisitUnaryExpression(Unary expression);
 }
