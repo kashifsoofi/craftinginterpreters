@@ -13,8 +13,10 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Scanning\" />
+    <None Remove="Parser\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scanning\" />
+    <Folder Include="Parser\" />
   </ItemGroup>
 </Project>
