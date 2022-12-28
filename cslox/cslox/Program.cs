@@ -1,4 +1,5 @@
-﻿using cslox.Scanning;
+﻿using cslox.Parser;
+using cslox.Scanning;
 
 class Lox
 {
@@ -6,6 +7,16 @@ class Lox
 
     public static int Main(string[] args)
     {
+        Expression expression = new Binary(
+            new Unary(
+                new Token(TokenType.MINUS, "-", null, 1),
+                new Literal("123")),
+            new Token(TokenType.STAR, "*", null, 1),
+            new Grouping(
+                new Literal(45.67)));
+
+        Console.WriteLine(new AstPrinter().Print(expression));
+
         if (args.Length > 1)
         {
             Console.WriteLine("Usage: cslox [script]");

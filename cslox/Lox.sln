@@ -5,6 +5,8 @@ VisualStudioVersion = 25.0.1704.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cslox", "cslox\cslox.csproj", "{EEC7B9A1-0645-4BA9-9101-51CE51ADFE21}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tool", "Tool\Tool.csproj", "{AF061B74-05A9-4B63-89B9-FDB5BB222E3F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EEC7B9A1-0645-4BA9-9101-51CE51ADFE21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEC7B9A1-0645-4BA9-9101-51CE51ADFE21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEC7B9A1-0645-4BA9-9101-51CE51ADFE21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF061B74-05A9-4B63-89B9-FDB5BB222E3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF061B74-05A9-4B63-89B9-FDB5BB222E3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF061B74-05A9-4B63-89B9-FDB5BB222E3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF061B74-05A9-4B63-89B9-FDB5BB222E3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
