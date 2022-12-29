@@ -7,16 +7,6 @@ class Lox
 
     public static int Main(string[] args)
     {
-        Expression expression = new Binary(
-            new Unary(
-                new Token(TokenType.MINUS, "-", null, 1),
-                new Literal("123")),
-            new Token(TokenType.STAR, "*", null, 1),
-            new Grouping(
-                new Literal(45.67)));
-
-        Console.WriteLine(new AstPrinter().Print(expression));
-
         if (args.Length > 1)
         {
             Console.WriteLine("Usage: cslox [script]");
@@ -62,11 +52,13 @@ class Lox
     {
         var scanner = new Scanner(source);
         var tokens = scanner.ScanTokens();
+        var parser = new Parser(tokens);
+        var expression = parser.Parse();
 
-        foreach (var token in tokens)
-        {
-            Console.WriteLine(token);
-        }
+        // Stop if there was a syntax error.
+        if (hadError) return;
+
+        Console.WriteLine(new AstPrinter().Print(expression!));
     }
 
     public static void Error(int line, string message)
@@ -78,5 +70,17 @@ class Lox
     {
         Console.WriteLine($"[line {line}] Error{where}: {message}");
         hadError = true;
+    }
+
+    public static void Error(Token token, string message)
+    {
+        if (token.Type == TokenType.EOF)
+        {
+            Report(token.Line, " at end", message);
+        }
+        else
+        {
+            Report(token.Line, $" at `{token.Lexeme}`", message);
+        }
     }
 }
