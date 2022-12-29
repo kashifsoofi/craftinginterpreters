@@ -43,12 +43,12 @@ class Grouping : Expression
 
 class Literal : Expression
 {
-	public Literal(object value)
+	public Literal(object? value)
 	{
 		Value = value;
 	}
 
-	public object Value { get; }
+	public object? Value { get; }
 
 	public override T Accept<T>(IVisitor<T> visitor)
 	{
