@@ -14,9 +14,11 @@
   <ItemGroup>
     <None Remove="Scanning\" />
     <None Remove="Parser\" />
+    <None Remove="Interpreter\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scanning\" />
     <Folder Include="Parser\" />
+    <Folder Include="Interpreter\" />
   </ItemGroup>
 </Project>
