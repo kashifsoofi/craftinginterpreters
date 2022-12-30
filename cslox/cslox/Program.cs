@@ -1,9 +1,12 @@
-﻿using cslox.Parser;
+﻿using cslox.Interpreter;
+using cslox.Parser;
 using cslox.Scanning;
 
 class Lox
 {
+    static Interpreter interpreter = new Interpreter();
     static bool hadError = false;
+    static bool hadRuntimeError = false;
 
     public static int Main(string[] args)
     {
@@ -24,6 +27,10 @@ class Lox
         if (hadError)
         {
             return 65;
+        }
+        if (hadRuntimeError)
+        {
+            return 70;
         }
         return 0;
     }
@@ -58,7 +65,7 @@ class Lox
         // Stop if there was a syntax error.
         if (hadError) return;
 
-        Console.WriteLine(new AstPrinter().Print(expression!));
+        interpreter.Interpret(expression!);
     }
 
     public static void Error(int line, string message)
@@ -82,5 +89,11 @@ class Lox
         {
             Report(token.Line, $" at `{token.Lexeme}`", message);
         }
+    }
+
+    public static void RuntimeError(RuntimeError error)
+    {
+        Console.WriteLine($"{error.Message}\n[line {error.Token.Line}]");
+        hadRuntimeError = true;
     }
 }
