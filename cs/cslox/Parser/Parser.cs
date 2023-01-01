@@ -13,19 +13,42 @@ class Parser
         this.tokens = tokens;
     }
 
-    public Expression? Parse()
+    public List<Stmt> Parse()
     {
-        try
+        var statements = new List<Stmt>();
+        while (!IsAtEnd())
         {
-            return Expression();
+            statements.Add(Statement());
         }
-        catch (ParseError)
-        {
-            return null;
-        }
+
+        return statements;
     }
 
-    private Expression Expression()
+    private Stmt Statement()
+    {
+        if (Match(TokenType.PRINT))
+        {
+            return PrintStatement();
+        }
+
+        return ExpressionStatement();
+    }
+
+    private Stmt PrintStatement()
+    {
+        Expr value = Expression();
+        Consume(TokenType.SEMICOLON, "Expect ';' after value.");
+        return new Print(value);
+    }
+
+    private Stmt ExpressionStatement()
+    {
+        var expr = Expression();
+        Consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        return new ExpressionStmt(expr);
+    }
+
+    private Expr Expression()
     {
         return Equality();
     }
@@ -69,7 +92,7 @@ class Parser
     }
 
     // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-    private Expression Equality()
+    private Expr Equality()
     {
         var expr = Comparison();
 
@@ -84,7 +107,7 @@ class Parser
     }
 
     // comparison     → term(( ">" | ">=" | "<" | "<=" ) term )* ;
-    private Expression Comparison()
+    private Expr Comparison()
     {
         var expr = Term();
 
@@ -99,7 +122,7 @@ class Parser
     }
 
     // term           → factor ( ( "-" | "+" ) factor )* ;
-    private Expression Term()
+    private Expr Term()
     {
         var expr = Factor();
 
@@ -114,7 +137,7 @@ class Parser
     }
 
     // factor         → unary ( ( "/" | "*" ) unary )* ;
-    private Expression Factor()
+    private Expr Factor()
     {
         var expr = Unary();
 
@@ -130,7 +153,7 @@ class Parser
 
     // unary          → ( "!" | "-" ) unary
     //                | primary ;
-    private Expression Unary()
+    private Expr Unary()
     {
         if (Match(TokenType.BANG, TokenType.MINUS))
         {
@@ -144,7 +167,7 @@ class Parser
 
     // primary        → NUMBER | STRING | "true" | "false" | "nil"
     //                | "(" expression ")" ;
-    private Expression Primary()
+    private Expr Primary()
     {
         if (Match(TokenType.FALSE))
         {

@@ -3,45 +3,45 @@ using System.Text;
 
 namespace cslox.Parser;
 
-class AstPrinter : IVisitor<string>
+class AstPrinter : IExprVisitor<string>
 {
-    public string Print(Expression expression)
+    public string Print(Expr expr)
     {
-        return expression.Accept(this);
+        return expr.Accept(this);
     }
 
-    public string VisitBinaryExpression(Binary expression)
+    public string VisitBinaryExpr(Binary expr)
     {
-        return Parenthesize(expression.Operator.Lexeme, expression.Left, expression.Right);
+        return Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
     }
 
-    public string VisitGroupingExpression(Grouping expression)
+    public string VisitGroupingExpr(Grouping expr)
     {
-        return Parenthesize("group", expression.Expression);
+        return Parenthesize("group", expr.Expression);
     }
 
-    public string VisitLiteralExpression(Literal expression)
+    public string VisitLiteralExpr(Literal expr)
     {
-        if (expression.Value == null)
+        if (expr.Value == null)
         {
             return "nil";
         }
-        return expression.Value.ToString()!;
+        return expr.Value.ToString()!;
     }
 
-    public string VisitUnaryExpression(Unary expression)
+    public string VisitUnaryExpr(Unary expr)
     {
-        return Parenthesize(expression.Operator.Lexeme, expression.Right);
+        return Parenthesize(expr.Operator.Lexeme, expr.Right);
     }
 
-    private string Parenthesize(string name, params Expression[] expressions)
+    private string Parenthesize(string name, params Expr[] exprs)
     {
         var builder = new StringBuilder();
         builder.Append("(").Append(name);
-        foreach (var expression in expressions)
+        foreach (var expr in exprs)
         {
             builder.Append(" ");
-            builder.Append(expression.Accept(this));
+            builder.Append(expr.Accept(this));
         }
         builder.Append(")");
 
