@@ -8,6 +8,7 @@ interface IExprVisitor<T>
 	T VisitGroupingExpr(Grouping expr);
 	T VisitLiteralExpr(Literal expr);
 	T VisitUnaryExpr(Unary expr);
+	T VisitVariableExpr(Variable expr);
 }
 
 abstract class Expr
@@ -51,12 +52,12 @@ class Grouping : Expr
 
 class Literal : Expr
 {
-	public Literal(object value)
+	public Literal(object? value)
 	{
 		Value = value;
 	}
 
-	public object Value { get; }
+	public object? Value { get; }
 
 	public override T Accept<T>(IExprVisitor<T> visitor)
 	{
@@ -78,5 +79,20 @@ class Unary : Expr
 	public override T Accept<T>(IExprVisitor<T> visitor)
 	{
 		return visitor.VisitUnaryExpr(this);
+	}
+}
+
+class Variable : Expr
+{
+	public Variable(Token name)
+	{
+		Name = name;
+	}
+
+	public Token Name { get; }
+
+	public override T Accept<T>(IExprVisitor<T> visitor)
+	{
+		return visitor.VisitVariableExpr(this);
 	}
 }

@@ -10,6 +10,8 @@ class Void
 
 class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 {
+    private Environment environment = new Environment();
+
     public void Interpret(List<Stmt> statements)
     {
         try
@@ -103,6 +105,11 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public object? VisitVariableExpr(Variable expr)
+    {
+        return environment.Get(expr.Name);
+    }
+
     public Void? VisitExpressionStmt(ExpressionStmt stmt)
     {
         Evaluate(stmt.Expression);
@@ -113,6 +120,18 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
     {
         var value = Evaluate(stmt.Expression);
         Console.WriteLine(Stringify(value));
+        return null;
+    }
+
+    public Void? VisitVarStmt(Var stmt)
+    {
+        object? value = null;
+        if (stmt.Initializer != null)
+        {
+            value = Evaluate(stmt.Initializer);
+        }
+
+        environment.Define(stmt.Name.Lexeme, value);
         return null;
     }
 

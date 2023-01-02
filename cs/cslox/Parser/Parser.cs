@@ -18,10 +18,32 @@ class Parser
         var statements = new List<Stmt>();
         while (!IsAtEnd())
         {
-            statements.Add(Statement());
+            var statement = Declaration();
+            if (statement != null)
+            {
+                statements.Add(statement);
+            }
         }
 
         return statements;
+    }
+
+    private Stmt? Declaration()
+    {
+        try
+        {
+            if (Match(TokenType.VAR))
+            {
+                return VarDeclaration();
+            }
+
+            return Statement();
+        }
+        catch (ParseError)
+        {
+            Synchronize();
+            return null;
+        }
     }
 
     private Stmt Statement()
@@ -46,6 +68,20 @@ class Parser
         var expr = Expression();
         Consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new ExpressionStmt(expr);
+    }
+
+    private Stmt VarDeclaration()
+    {
+        var name = Consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+        Expr? initializer = null;
+        if (Match(TokenType.EQUAL))
+        {
+            initializer = Expression();
+        }
+
+        Consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        return new Var(name, initializer);
     }
 
     private Expr Expression()
@@ -185,6 +221,11 @@ class Parser
         if (Match(TokenType.NUMBER, TokenType.STRING))
         {
             return new Literal(Previous().Literal);
+        }
+
+        if (Match(TokenType.IDENTIFIER))
+        {
+            return new Variable(Previous());
         }
 
         if (Match(TokenType.LEFT_PAREN))
