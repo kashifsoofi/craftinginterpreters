@@ -86,7 +86,7 @@ class Parser
 
     private Expr Expression()
     {
-        return Equality();
+        return Assignment();
     }
 
     private Token Peek() => tokens[current];
@@ -125,6 +125,27 @@ class Parser
         }
 
         return false;
+    }
+
+    // assignment     → IDENTIFIER "=" assignment
+    //                | equality ;
+    private Expr Assignment()
+    {
+        var expr = Equality();
+
+        if (Match(TokenType.EQUAL))
+        {
+            var equals = Previous();
+            var value = Assignment();
+
+            if (expr is Variable)
+            {
+                var name = ((Variable)expr).Name;
+                return new Assign(name, value);
+            }
+        }
+
+        return expr;
     }
 
     // equality       → comparison ( ( "!=" | "==" ) comparison )* ;

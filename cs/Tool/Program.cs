@@ -2,6 +2,7 @@
 var outputDir = "../../../../cslox/Parser";
 var types = new Dictionary<string, string[]>
 {
+    ["Assign"] = new[] { "Token Name", "Expr Value" },
     ["Binary"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
     ["Grouping"] = new[] { "Expr Expression" },
     ["Literal"] = new[] { "object? Value" },

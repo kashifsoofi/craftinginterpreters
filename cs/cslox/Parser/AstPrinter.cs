@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using cslox.Scanning;
 
 namespace cslox.Parser;
 
@@ -8,6 +9,11 @@ class AstPrinter : IExprVisitor<string>
     public string Print(Expr expr)
     {
         return expr.Accept(this);
+    }
+
+    public string VisitAssignExpr(Assign expr)
+    {
+        return Parenthesize2("=", expr.Name.Lexeme, expr.Value);
     }
 
     public string VisitBinaryExpr(Binary expr)
@@ -51,6 +57,44 @@ class AstPrinter : IExprVisitor<string>
         builder.Append(")");
 
         return builder.ToString();
+    }
+
+    private string Parenthesize2(string name, params object[] parts)
+    {
+        var builder = new StringBuilder();
+        builder.Append("(").Append(name);
+        Transform(builder, parts);
+        builder.Append(")");
+
+        return builder.ToString();
+    }
+
+    private void Transform(StringBuilder builder, params object[] parts)
+    {
+        foreach (var part in parts)
+        {
+            builder.Append(" ");
+            if (part is Expr)
+            {
+                builder.Append(((Expr)part).Accept(this));
+            }
+            else if (part is Stmt)
+            {
+                // builder.Append(((Stmt)part).Accept<string>(this));
+            }
+            else if (part is Token)
+            {
+                builder.Append(((Token)part).Lexeme);
+            }
+            //else if (part is List)
+            //{
+            //    builder.Append((List))part).ToArray());
+            //}
+            else
+            {
+                builder.Append(part);
+            }
+        }
     }
 }
 

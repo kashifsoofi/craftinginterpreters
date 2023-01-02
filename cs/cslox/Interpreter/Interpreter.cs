@@ -27,6 +27,13 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         }
     }
 
+    public object? VisitAssignExpr(Assign expr)
+    {
+        var value = Evaluate(expr.Value);
+        environment.Assign(expr.Name, expr.Value);
+        return value;
+    }
+
     public object? VisitBinaryExpr(Binary expr)
     {
         var left = Evaluate(expr.Left);

@@ -4,6 +4,7 @@ namespace cslox.Parser;
 
 interface IExprVisitor<T>
 {
+	T VisitAssignExpr(Assign expr);
 	T VisitBinaryExpr(Binary expr);
 	T VisitGroupingExpr(Grouping expr);
 	T VisitLiteralExpr(Literal expr);
@@ -14,6 +15,23 @@ interface IExprVisitor<T>
 abstract class Expr
 {
 	public abstract T Accept<T>(IExprVisitor<T> visitor);
+}
+
+class Assign : Expr
+{
+	public Assign(Token name, Expr value)
+	{
+		Name = name;
+		Value = value;
+	}
+
+	public Token Name { get; }
+	public Expr Value { get; }
+
+	public override T Accept<T>(IExprVisitor<T> visitor)
+	{
+		return visitor.VisitAssignExpr(this);
+	}
 }
 
 class Binary : Expr
