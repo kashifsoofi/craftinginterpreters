@@ -13,21 +13,101 @@ class Parser
         this.tokens = tokens;
     }
 
-    public Expression? Parse()
+    public List<Stmt> Parse()
+    {
+        var statements = new List<Stmt>();
+        while (!IsAtEnd())
+        {
+            var statement = Declaration();
+            if (statement != null)
+            {
+                statements.Add(statement);
+            }
+        }
+
+        return statements;
+    }
+
+    private Stmt? Declaration()
     {
         try
         {
-            return Expression();
+            if (Match(TokenType.VAR))
+            {
+                return VarDeclaration();
+            }
+
+            return Statement();
         }
         catch (ParseError)
         {
+            Synchronize();
             return null;
         }
     }
 
-    private Expression Expression()
+    private Stmt Statement()
     {
-        return Equality();
+        if (Match(TokenType.PRINT))
+        {
+            return PrintStatement();
+        }
+        if (Match(TokenType.LEFT_BRACE))
+        {
+            return new Block(Block());
+        }
+
+        return ExpressionStatement();
+    }
+
+    private Stmt PrintStatement()
+    {
+        Expr value = Expression();
+        Consume(TokenType.SEMICOLON, "Expect ';' after value.");
+        return new Print(value);
+    }
+
+    private List<Stmt> Block()
+    {
+        var statements = new List<Stmt>();
+
+        while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+        {
+            var statement = Declaration();
+            if (statement != null)
+            {
+                statements.Add(statement);
+            }
+        }
+
+        Consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
+    }
+
+    private Stmt ExpressionStatement()
+    {
+        var expr = Expression();
+        Consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        return new ExpressionStmt(expr);
+    }
+
+    private Stmt VarDeclaration()
+    {
+        var name = Consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+        Expr? initializer = null;
+        if (Match(TokenType.EQUAL))
+        {
+            initializer = Expression();
+        }
+
+        Consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        return new Var(name, initializer);
+    }
+
+    private Expr Expression()
+    {
+        return Assignment();
     }
 
     private Token Peek() => tokens[current];
@@ -68,8 +148,29 @@ class Parser
         return false;
     }
 
+    // assignment     → IDENTIFIER "=" assignment
+    //                | equality ;
+    private Expr Assignment()
+    {
+        var expr = Equality();
+
+        if (Match(TokenType.EQUAL))
+        {
+            var equals = Previous();
+            var value = Assignment();
+
+            if (expr is Variable)
+            {
+                var name = ((Variable)expr).Name;
+                return new Assign(name, value);
+            }
+        }
+
+        return expr;
+    }
+
     // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-    private Expression Equality()
+    private Expr Equality()
     {
         var expr = Comparison();
 
@@ -84,7 +185,7 @@ class Parser
     }
 
     // comparison     → term(( ">" | ">=" | "<" | "<=" ) term )* ;
-    private Expression Comparison()
+    private Expr Comparison()
     {
         var expr = Term();
 
@@ -99,7 +200,7 @@ class Parser
     }
 
     // term           → factor ( ( "-" | "+" ) factor )* ;
-    private Expression Term()
+    private Expr Term()
     {
         var expr = Factor();
 
@@ -114,7 +215,7 @@ class Parser
     }
 
     // factor         → unary ( ( "/" | "*" ) unary )* ;
-    private Expression Factor()
+    private Expr Factor()
     {
         var expr = Unary();
 
@@ -130,7 +231,7 @@ class Parser
 
     // unary          → ( "!" | "-" ) unary
     //                | primary ;
-    private Expression Unary()
+    private Expr Unary()
     {
         if (Match(TokenType.BANG, TokenType.MINUS))
         {
@@ -144,7 +245,7 @@ class Parser
 
     // primary        → NUMBER | STRING | "true" | "false" | "nil"
     //                | "(" expression ")" ;
-    private Expression Primary()
+    private Expr Primary()
     {
         if (Match(TokenType.FALSE))
         {
@@ -162,6 +263,11 @@ class Parser
         if (Match(TokenType.NUMBER, TokenType.STRING))
         {
             return new Literal(Previous().Literal);
+        }
+
+        if (Match(TokenType.IDENTIFIER))
+        {
+            return new Variable(Previous());
         }
 
         if (Match(TokenType.LEFT_PAREN))

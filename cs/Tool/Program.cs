@@ -2,12 +2,23 @@
 var outputDir = "../../../../cslox/Parser";
 var types = new Dictionary<string, string[]>
 {
-    ["Binary"] = new[] { "Expression Left", "Token Operator", "Expression Right" },
-    ["Grouping"] = new[] { "Expression Expression" },
-    ["Literal"] = new[] { "object Value" },
-    ["Unary"] = new[] { "Token Operator", "Expression Right" },
+    ["Assign"] = new[] { "Token Name", "Expr Value" },
+    ["Binary"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
+    ["Grouping"] = new[] { "Expr Expression" },
+    ["Literal"] = new[] { "object? Value" },
+    ["Unary"] = new[] { "Token Operator", "Expr Right" },
+    ["Variable"] = new[] { "Token Name" },
 };
-DefineAst(outputDir, "Expression", types);
+DefineAst(outputDir, "Expr", types);
+
+var stmtTypes = new Dictionary<string, string[]>
+{
+    ["Block"] = new[] { "List<Stmt> Statements" },
+    ["ExpressionStmt"] = new[] { "Expr Expression" },
+    ["Print"] = new[] { "Expr Expression" },
+    ["Var"] = new[] { "Token Name", "Expr? Initializer" },
+};
+DefineAst(outputDir, "Stmt", stmtTypes);
 
 static void DefineAst(string outputDir, string baseName, Dictionary<string, string[]> types)
 {
@@ -18,11 +29,13 @@ static void DefineAst(string outputDir, string baseName, Dictionary<string, stri
     writer.WriteLine("using cslox.Scanning;");
     writer.WriteLine("");
     writer.WriteLine("namespace cslox.Parser;");
-    writer.WriteLine("");
 
+    DefineVisitor(writer, baseName, types);
+
+    writer.WriteLine("");
     writer.WriteLine($"abstract class {baseName}");
     writer.WriteLine("{");
-    writer.WriteLine("\tpublic abstract T Accept<T>(IVisitor<T> visitor);");
+    writer.WriteLine($"\tpublic abstract T Accept<T>(I{baseName}Visitor<T> visitor);");
     writer.WriteLine("}");
 
     foreach (var (className, fields) in types)
@@ -30,7 +43,6 @@ static void DefineAst(string outputDir, string baseName, Dictionary<string, stri
         DefineType(writer, baseName, className, fields);
     }
 
-    DefineVisitor(writer, baseName, types);
 }
 
 static void DefineType(StreamWriter writer, string baseName, string className, string[] fields)
@@ -76,9 +88,14 @@ static void DefineType(StreamWriter writer, string baseName, string className, s
         writer.WriteLine($"\tpublic {field} {{ get; }}");
     }
     writer.WriteLine("");
-    writer.WriteLine("\tpublic override T Accept<T>(IVisitor<T> visitor)");
+    writer.WriteLine($"\tpublic override T Accept<T>(I{baseName}Visitor<T> visitor)");
     writer.WriteLine("\t{");
-    writer.WriteLine($"\t\treturn visitor.Visit{className}{baseName}(this);");
+    var methodName = $"Visit{className}";
+    if (!methodName.EndsWith(baseName))
+    {
+        methodName += baseName;
+    }
+    writer.WriteLine($"\t\treturn visitor.{methodName}(this);");
     writer.WriteLine("\t}");
     writer.WriteLine("}");
 }
@@ -86,11 +103,16 @@ static void DefineType(StreamWriter writer, string baseName, string className, s
 static void DefineVisitor(StreamWriter writer, string baseName, Dictionary<string, string[]> types)
 {
     writer.WriteLine("");
-    writer.WriteLine("interface IVisitor<T>");
+    writer.WriteLine($"interface I{baseName}Visitor<T>");
     writer.WriteLine("{");
     foreach (var (typeName, fields) in types)
     {
-        writer.WriteLine($"\tT Visit{typeName}{baseName}({typeName} {baseName.ToLower()});");
+        var methodName = $"Visit{typeName}";
+        if (!methodName.EndsWith(baseName))
+        {
+            methodName += baseName;
+        }
+        writer.WriteLine($"\tT {methodName}({typeName} {baseName.ToLower()});");
     }
     writer.WriteLine("}");
 }

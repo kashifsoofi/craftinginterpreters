@@ -1,51 +1,100 @@
 ﻿using System;
 using System.Text;
+using cslox.Scanning;
 
 namespace cslox.Parser;
 
-class AstPrinter : IVisitor<string>
+class AstPrinter : IExprVisitor<string>
 {
-    public string Print(Expression expression)
+    public string Print(Expr expr)
     {
-        return expression.Accept(this);
+        return expr.Accept(this);
     }
 
-    public string VisitBinaryExpression(Binary expression)
+    public string VisitAssignExpr(Assign expr)
     {
-        return Parenthesize(expression.Operator.Lexeme, expression.Left, expression.Right);
+        return Parenthesize2("=", expr.Name.Lexeme, expr.Value);
     }
 
-    public string VisitGroupingExpression(Grouping expression)
+    public string VisitBinaryExpr(Binary expr)
     {
-        return Parenthesize("group", expression.Expression);
+        return Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
     }
 
-    public string VisitLiteralExpression(Literal expression)
+    public string VisitGroupingExpr(Grouping expr)
     {
-        if (expression.Value == null)
+        return Parenthesize("group", expr.Expression);
+    }
+
+    public string VisitLiteralExpr(Literal expr)
+    {
+        if (expr.Value == null)
         {
             return "nil";
         }
-        return expression.Value.ToString()!;
+        return expr.Value.ToString()!;
     }
 
-    public string VisitUnaryExpression(Unary expression)
+    public string VisitUnaryExpr(Unary expr)
     {
-        return Parenthesize(expression.Operator.Lexeme, expression.Right);
+        return Parenthesize(expr.Operator.Lexeme, expr.Right);
     }
 
-    private string Parenthesize(string name, params Expression[] expressions)
+    public string VisitVariableExpr(Variable expr)
+    {
+        return expr.Name.Lexeme;
+    }
+
+    private string Parenthesize(string name, params Expr[] exprs)
     {
         var builder = new StringBuilder();
         builder.Append("(").Append(name);
-        foreach (var expression in expressions)
+        foreach (var expr in exprs)
         {
             builder.Append(" ");
-            builder.Append(expression.Accept(this));
+            builder.Append(expr.Accept(this));
         }
         builder.Append(")");
 
         return builder.ToString();
+    }
+
+    private string Parenthesize2(string name, params object[] parts)
+    {
+        var builder = new StringBuilder();
+        builder.Append("(").Append(name);
+        Transform(builder, parts);
+        builder.Append(")");
+
+        return builder.ToString();
+    }
+
+    private void Transform(StringBuilder builder, params object[] parts)
+    {
+        foreach (var part in parts)
+        {
+            builder.Append(" ");
+            if (part is Expr)
+            {
+                builder.Append(((Expr)part).Accept(this));
+            }
+            else if (part is Stmt)
+            {
+                // builder.Append(((Stmt)part).Accept<string>(this));
+            }
+            else if (part is Token)
+            {
+                builder.Append(((Token)part).Lexeme);
+            }
+            //else if (part is List)
+            //{
+            //    builder.Append((List))part).ToArray());
+            //}
+            else
+            {
+                builder.Append(part);
+            }
+        }
     }
 }
 

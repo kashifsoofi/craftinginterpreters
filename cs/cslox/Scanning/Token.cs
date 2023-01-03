@@ -1,7 +1,7 @@
 ﻿using System;
 namespace cslox.Scanning;
 
-class Token
+public class Token
 {
 	public Token(TokenType type, string lexeme, object? literal, int line)
 	{

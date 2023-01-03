@@ -3,14 +3,23 @@ using cslox.Scanning;
 
 namespace cslox.Interpreter;
 
-class Interpreter : IVisitor<object?>
+class Void
 {
-    public void Interpret(Expression expression)
+    private Void() { }
+}
+
+class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
+{
+    private Environment environment = new Environment();
+
+    public void Interpret(List<Stmt> statements)
     {
         try
         {
-            var value = Evaluate(expression);
-            Console.WriteLine(Stringify(value));
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
         }
         catch (RuntimeError error)
         {
@@ -18,31 +27,38 @@ class Interpreter : IVisitor<object?>
         }
     }
 
-    public object? VisitBinaryExpression(Binary expression)
+    public object? VisitAssignExpr(Assign expr)
     {
-        var left = Evaluate(expression.Left);
-        var right = Evaluate(expression.Right);
+        var value = Evaluate(expr.Value);
+        environment.Assign(expr.Name, expr.Value);
+        return value;
+    }
 
-        switch (expression.Operator.Type)
+    public object? VisitBinaryExpr(Binary expr)
+    {
+        var left = Evaluate(expr.Left);
+        var right = Evaluate(expr.Right);
+
+        switch (expr.Operator.Type)
         {
             case TokenType.GREATER:
-                CheckNumberOperands(expression.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left! > (double)right!;
             case TokenType.GREATER_EQUAL:
-                CheckNumberOperands(expression.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left! >= (double)right!;
             case TokenType.LESS:
-                CheckNumberOperands(expression.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left! < (double)right!;
             case TokenType.LESS_EQUAL:
-                CheckNumberOperands(expression.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left! <= (double)right!;
             case TokenType.BANG_EQUAL:
                 return !IsEqual(left, right);
             case TokenType.EQUAL_EQUAL:
                 return IsEqual(left, right);
             case TokenType.MINUS:
-                CheckNumberOperands(expression.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double) left! - (double)right!;
             case TokenType.PLUS:
                 if (left is double && right is double)
@@ -54,16 +70,16 @@ class Interpreter : IVisitor<object?>
                 {
                     return (string)left + (string)right;
                 }
-                throw new RuntimeError(expression.Operator, "Operands must be two numbers or two strings");
+                throw new RuntimeError(expr.Operator, "Operands must be two numbers or two strings");
             case TokenType.SLASH:
-                CheckNumberOperands(expression.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 if ((double)right! == 0)
                 {
-                    throw new RuntimeError(expression.Operator, "Division by zero");
+                    throw new RuntimeError(expr.Operator, "Division by zero");
                 }
                 return (double)left! / (double)right!;
             case TokenType.STAR:
-                CheckNumberOperands(expression.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left! * (double)right!;
 
         }
@@ -71,34 +87,93 @@ class Interpreter : IVisitor<object?>
         return null;
     }
 
-    public object? VisitGroupingExpression(Grouping expression)
+    public object? VisitGroupingExpr(Grouping expr)
     {
-        return Evaluate(expression.Expression);
+        return Evaluate(expr.Expression);
     }
 
-    public object? VisitLiteralExpression(Literal expression)
+    public object? VisitLiteralExpr(Literal expr)
     {
-        return expression.Value;
+        return expr.Value;
     }
 
-    public object? VisitUnaryExpression(Unary expression)
+    public object? VisitUnaryExpr(Unary expr)
     {
-        var right = Evaluate(expression.Right);
-        switch (expression.Operator.Type)
+        var right = Evaluate(expr.Right);
+        switch (expr.Operator.Type)
         {
             case TokenType.BANG:
                 return !IsTruthy(right);
             case TokenType.MINUS:
-                CheckNumberOperand(expression.Operator, right);
+                CheckNumberOperand(expr.Operator, right);
                 return -(double)right!;
         }
 
         return null;
     }
 
-    private object? Evaluate(Expression expression)
+    public object? VisitVariableExpr(Variable expr)
     {
-        return expression.Accept(this);
+        return environment.Get(expr.Name);
+    }
+
+    public Void? VisitBlockStmt(Block stmt)
+    {
+        ExecuteBlock(stmt.Statements, new Environment(environment));
+        return null;
+    }
+
+    public Void? VisitExpressionStmt(ExpressionStmt stmt)
+    {
+        Evaluate(stmt.Expression);
+        return null;
+    }
+
+    public Void? VisitPrintStmt(Print stmt)
+    {
+        var value = Evaluate(stmt.Expression);
+        Console.WriteLine(Stringify(value));
+        return null;
+    }
+
+    public Void? VisitVarStmt(Var stmt)
+    {
+        object? value = null;
+        if (stmt.Initializer != null)
+        {
+            value = Evaluate(stmt.Initializer);
+        }
+
+        environment.Define(stmt.Name.Lexeme, value);
+        return null;
+    }
+
+    private object? Evaluate(Expr expr)
+    {
+        return expr.Accept(this);
+    }
+
+    private void Execute(Stmt stmt)
+    {
+        stmt.Accept(this);
+    }
+
+    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    {
+        var previous = this.environment;
+        try
+        {
+            this.environment = environment;
+
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            this.environment = previous;
+        }
     }
 
     private bool IsTruthy(object? obj)
