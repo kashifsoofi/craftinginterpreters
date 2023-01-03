@@ -117,6 +117,12 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return environment.Get(expr.Name);
     }
 
+    public Void? VisitBlockStmt(Block stmt)
+    {
+        ExecuteBlock(stmt.Statements, new Environment(environment));
+        return null;
+    }
+
     public Void? VisitExpressionStmt(ExpressionStmt stmt)
     {
         Evaluate(stmt.Expression);
@@ -150,6 +156,24 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
     private void Execute(Stmt stmt)
     {
         stmt.Accept(this);
+    }
+
+    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    {
+        var previous = this.environment;
+        try
+        {
+            this.environment = environment;
+
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            this.environment = previous;
+        }
     }
 
     private bool IsTruthy(object? obj)

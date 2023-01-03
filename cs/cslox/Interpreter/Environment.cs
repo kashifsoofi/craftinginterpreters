@@ -5,7 +5,17 @@ namespace cslox.Interpreter;
 
 public class Environment
 {
+	private Environment? enclosing;
 	private Dictionary<string, object?> values = new Dictionary<string, object?>();
+
+    public Environment() :
+		this(null)
+	{ }
+
+    public Environment(Environment? enclosing)
+	{
+		this.enclosing = enclosing;
+	}
 
 	public void Define(string name, object? value)
 	{
@@ -19,6 +29,11 @@ public class Environment
 			return values[name.Lexeme];
 		}
 
+		if (enclosing != null)
+		{
+			return enclosing.Get(name);
+		}
+
 		throw new RuntimeError(name, $"Undefined variable '{name.Lexeme}'.");
 	}
 
@@ -27,6 +42,12 @@ public class Environment
 		if (values.ContainsKey(name.Lexeme))
 		{
 			values[name.Lexeme] = value;
+			return;
+		}
+
+		if (enclosing != null)
+		{
+			enclosing.Assign(name, value);
 			return;
 		}
 

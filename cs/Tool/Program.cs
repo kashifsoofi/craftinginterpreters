@@ -13,6 +13,7 @@ DefineAst(outputDir, "Expr", types);
 
 var stmtTypes = new Dictionary<string, string[]>
 {
+    ["Block"] = new[] { "List<Stmt> Statements" },
     ["ExpressionStmt"] = new[] { "Expr Expression" },
     ["Print"] = new[] { "Expr Expression" },
     ["Var"] = new[] { "Token Name", "Expr? Initializer" },

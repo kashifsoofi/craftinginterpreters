@@ -4,6 +4,7 @@ namespace cslox.Parser;
 
 interface IStmtVisitor<T>
 {
+	T VisitBlockStmt(Block stmt);
 	T VisitExpressionStmt(ExpressionStmt stmt);
 	T VisitPrintStmt(Print stmt);
 	T VisitVarStmt(Var stmt);
@@ -12,6 +13,21 @@ interface IStmtVisitor<T>
 abstract class Stmt
 {
 	public abstract T Accept<T>(IStmtVisitor<T> visitor);
+}
+
+class Block : Stmt
+{
+	public Block(List<Stmt> statements)
+	{
+		Statements = statements;
+	}
+
+	public List<Stmt> Statements { get; }
+
+	public override T Accept<T>(IStmtVisitor<T> visitor)
+	{
+		return visitor.VisitBlockStmt(this);
+	}
 }
 
 class ExpressionStmt : Stmt
