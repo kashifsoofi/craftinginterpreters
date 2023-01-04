@@ -9,6 +9,7 @@ interface IStmtVisitor<T>
 	T VisitIfStmt(If stmt);
 	T VisitPrintStmt(Print stmt);
 	T VisitVarStmt(Var stmt);
+	T VisitWhileStmt(While stmt);
 }
 
 abstract class Stmt
@@ -94,5 +95,22 @@ class Var : Stmt
 	public override T Accept<T>(IStmtVisitor<T> visitor)
 	{
 		return visitor.VisitVarStmt(this);
+	}
+}
+
+class While : Stmt
+{
+	public While(Expr condition, Stmt body)
+	{
+		Condition = condition;
+		Body = body;
+	}
+
+	public Expr Condition { get; }
+	public Stmt Body { get; }
+
+	public override T Accept<T>(IStmtVisitor<T> visitor)
+	{
+		return visitor.VisitWhileStmt(this);
 	}
 }

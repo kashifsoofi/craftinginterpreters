@@ -19,6 +19,7 @@ var stmtTypes = new Dictionary<string, string[]>
     ["If"] = new[] { "Expr Condition", "Stmt ThenBranch", "Stmt? ElseBranch" },
     ["Print"] = new[] { "Expr Expression" },
     ["Var"] = new[] { "Token Name", "Expr? Initializer" },
+    ["While"] = new[] { "Expr Condition", "Stmt Body" }, 
 };
 DefineAst(outputDir, "Stmt", stmtTypes);
 

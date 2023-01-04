@@ -56,6 +56,10 @@ class Parser
         {
             return PrintStatement();
         }
+        if (Match(TokenType.WHILE))
+        {
+            return WhileStatement();
+        }
         if (Match(TokenType.LEFT_BRACE))
         {
             return new Block(Block());
@@ -85,6 +89,16 @@ class Parser
         Expr value = Expression();
         Consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new Print(value);
+    }
+
+    private Stmt WhileStatement()
+    {
+        Consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
+        var condition = Expression();
+        Consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
+        var body = Statement();
+
+        return new While(condition, body);
     }
 
     private List<Stmt> Block()
