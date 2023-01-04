@@ -171,7 +171,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return null;
     }
 
-    public Void? VisitWhileStatement(While stmt)
+    public Void? VisitWhileStmt(While stmt)
     {
         while (IsTruthy(stmt.Condition))
         {
