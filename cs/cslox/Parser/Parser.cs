@@ -48,6 +48,10 @@ class Parser
 
     private Stmt Statement()
     {
+        if (Match(TokenType.FOR))
+        {
+            return ForStatement();
+        }
         if (Match(TokenType.IF))
         {
             return IfStatement();
@@ -66,6 +70,60 @@ class Parser
         }
 
         return ExpressionStatement();
+    }
+
+    private Stmt ForStatement()
+    {
+        Consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.");
+
+        Stmt? initializer;
+        if (Match(TokenType.SEMICOLON))
+        {
+            initializer = null;
+        }
+        else if (Match(TokenType.VAR))
+        {
+            initializer = VarDeclaration();
+        }
+        else
+        {
+            initializer = ExpressionStatement();
+        }
+
+        Expr? condition = null;
+        if (!Check(TokenType.SEMICOLON))
+        {
+            condition = Expression();
+        }
+        Consume(TokenType.SEMICOLON, "Expect ';' after loop condition.");
+
+        Expr? increment = null;
+        if (!Check(TokenType.RIGHT_PAREN))
+        {
+            increment = Expression();
+        }
+        Consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.");
+
+        var body = Statement();
+
+        // desugar for loop
+        if (increment != null)
+        {
+            body = new Block(new List<Stmt> { body, new ExpressionStmt(increment) });
+        }
+
+        if (condition == null)
+        {
+            condition = new Literal(true);
+        }
+        body = new While(condition, body);
+
+        if (initializer != null)
+        {
+            body = new Block(new List<Stmt> { initializer, body });
+        }
+
+        return body;
     }
 
     private Stmt IfStatement()
