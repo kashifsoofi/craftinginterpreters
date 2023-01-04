@@ -129,6 +129,19 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitIfStmt(If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt.Condition)))
+        {
+            Execute(stmt.ThenBranch);
+        }
+        else if (stmt.ElseBranch != null)
+        {
+            Execute(stmt.ElseBranch);
+        }
+        return null;
+    }
+
     public Void? VisitPrintStmt(Print stmt)
     {
         var value = Evaluate(stmt.Expression);
