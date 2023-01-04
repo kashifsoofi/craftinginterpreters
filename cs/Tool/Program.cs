@@ -6,6 +6,7 @@ var types = new Dictionary<string, string[]>
     ["Binary"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
     ["Grouping"] = new[] { "Expr Expression" },
     ["Literal"] = new[] { "object? Value" },
+    ["Logical"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
     ["Unary"] = new[] { "Token Operator", "Expr Right" },
     ["Variable"] = new[] { "Token Name" },
 };
@@ -15,8 +16,10 @@ var stmtTypes = new Dictionary<string, string[]>
 {
     ["Block"] = new[] { "List<Stmt> Statements" },
     ["ExpressionStmt"] = new[] { "Expr Expression" },
+    ["If"] = new[] { "Expr Condition", "Stmt ThenBranch", "Stmt? ElseBranch" },
     ["Print"] = new[] { "Expr Expression" },
     ["Var"] = new[] { "Token Name", "Expr? Initializer" },
+    ["While"] = new[] { "Expr Condition", "Stmt Body" }, 
 };
 DefineAst(outputDir, "Stmt", stmtTypes);
 

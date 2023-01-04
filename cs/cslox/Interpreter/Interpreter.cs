@@ -92,6 +92,28 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return Evaluate(expr.Expression);
     }
 
+    public object? VisitLogicalExpr(Logical expr)
+    {
+        var left = Evaluate(expr.Left);
+
+        if (expr.Operator.Type == TokenType.OR)
+        {
+            if (IsTruthy(left))
+            {
+                return left;
+            }
+        }
+        else
+        {
+            if (!IsTruthy(left))
+            {
+                return left;
+            }
+        }
+
+        return Evaluate(expr.Right);
+    }
+
     public object? VisitLiteralExpr(Literal expr)
     {
         return expr.Value;
@@ -129,10 +151,32 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitIfStmt(If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt.Condition)))
+        {
+            Execute(stmt.ThenBranch);
+        }
+        else if (stmt.ElseBranch != null)
+        {
+            Execute(stmt.ElseBranch);
+        }
+        return null;
+    }
+
     public Void? VisitPrintStmt(Print stmt)
     {
         var value = Evaluate(stmt.Expression);
         Console.WriteLine(Stringify(value));
+        return null;
+    }
+
+    public Void? VisitWhileStmt(While stmt)
+    {
+        while (IsTruthy(stmt.Condition))
+        {
+            Execute(stmt.Body);
+        }
         return null;
     }
 

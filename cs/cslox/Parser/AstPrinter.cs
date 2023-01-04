@@ -26,6 +26,11 @@ class AstPrinter : IExprVisitor<string>
         return Parenthesize("group", expr.Expression);
     }
 
+    public string VisitLogicalExpr(Logical expr)
+    {
+        return Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
+    }
+
     public string VisitLiteralExpr(Literal expr)
     {
         if (expr.Value == null)
