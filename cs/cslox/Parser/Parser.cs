@@ -169,10 +169,10 @@ class Parser
     }
 
     // assignment     → IDENTIFIER "=" assignment
-    //                | equality ;
+    //                | logic_or ;
     private Expr Assignment()
     {
-        var expr = Equality();
+        var expr = Or();
 
         if (Match(TokenType.EQUAL))
         {
@@ -184,6 +184,35 @@ class Parser
                 var name = ((Variable)expr).Name;
                 return new Assign(name, value);
             }
+        }
+
+        return expr;
+    }
+
+    // logic_or       → logic_and ( "or" logic_and )* ;
+    private Expr Or()
+    {
+        var expr = And();
+        while (Match(TokenType.OR))
+        {
+            var @operator = Previous();
+            var right = And();
+            expr = new Logical(expr, @operator, right);
+        }
+
+        return expr;
+    }
+
+    // logic_and      → equality ( "and" equality )* ;
+    private Expr And()
+    {
+        var expr = Equality();
+
+        while (Match(TokenType.AND))
+        {
+            var @operator = Previous();
+            var right = Equality();
+            expr = new Logical(expr, @operator, right);
         }
 
         return expr;

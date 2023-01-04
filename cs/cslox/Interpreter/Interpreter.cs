@@ -92,6 +92,28 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return Evaluate(expr.Expression);
     }
 
+    public object? VisitLogicalExpr(Logical expr)
+    {
+        var left = Evaluate(expr.Left);
+
+        if (expr.Operator.Type == TokenType.OR)
+        {
+            if (IsTruthy(left))
+            {
+                return left;
+            }
+        }
+        else
+        {
+            if (!IsTruthy(left))
+            {
+                return left;
+            }
+        }
+
+        return Evaluate(expr.Right);
+    }
+
     public object? VisitLiteralExpr(Literal expr)
     {
         return expr.Value;

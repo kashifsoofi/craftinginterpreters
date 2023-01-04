@@ -8,6 +8,7 @@ interface IExprVisitor<T>
 	T VisitBinaryExpr(Binary expr);
 	T VisitGroupingExpr(Grouping expr);
 	T VisitLiteralExpr(Literal expr);
+	T VisitLogicalExpr(Logical expr);
 	T VisitUnaryExpr(Unary expr);
 	T VisitVariableExpr(Variable expr);
 }
@@ -80,6 +81,25 @@ class Literal : Expr
 	public override T Accept<T>(IExprVisitor<T> visitor)
 	{
 		return visitor.VisitLiteralExpr(this);
+	}
+}
+
+class Logical : Expr
+{
+	public Logical(Expr left, Token @operator, Expr right)
+	{
+		Left = left;
+		Operator = @operator;
+		Right = right;
+	}
+
+	public Expr Left { get; }
+	public Token Operator { get; }
+	public Expr Right { get; }
+
+	public override T Accept<T>(IExprVisitor<T> visitor)
+	{
+		return visitor.VisitLogicalExpr(this);
 	}
 }
 
