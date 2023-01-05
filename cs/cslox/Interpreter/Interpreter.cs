@@ -10,7 +10,14 @@ class Void
 
 class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 {
-    private Environment environment = new Environment();
+    private readonly Environment globals = new Environment();
+    private Environment environment;
+
+    public Interpreter()
+    {
+        globals.Define("clock", new Clock());
+        environment = globals;
+    }
 
     public void Interpret(List<Stmt> statements)
     {
@@ -85,6 +92,33 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         }
 
         return null;
+    }
+
+    public object? VisitCallExpr(Call expr)
+    {
+        var callee = Evaluate(expr.Callee);
+
+        var arguments = new List<object>();
+        foreach (var argument in expr.Arguments)
+        {
+            var argumentValue = Evaluate(argument);
+            if (argumentValue != null)
+            {
+                arguments.Add(argumentValue);
+            }
+        }
+
+        if (callee is not ILoxCallable)
+        {
+            throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
+        }
+        var function = (ILoxCallable)callee!;
+        if (arguments.Count != function.Arity())
+        {
+            throw new RuntimeError(expr.Paren, $"Expected {function.Arity()} arguments but got {arguments.Count}.");
+        }
+
+        return function.Call(this, arguments);
     }
 
     public object? VisitGroupingExpr(Grouping expr)

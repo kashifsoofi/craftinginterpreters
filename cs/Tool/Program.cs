@@ -4,6 +4,7 @@ var types = new Dictionary<string, string[]>
 {
     ["Assign"] = new[] { "Token Name", "Expr Value" },
     ["Binary"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
+    ["Call"] = new[] { "Expr Callee", "Token Paren", "List<Expr> Arguments" },
     ["Grouping"] = new[] { "Expr Expression" },
     ["Literal"] = new[] { "object? Value" },
     ["Logical"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
