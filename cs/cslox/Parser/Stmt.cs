@@ -6,6 +6,7 @@ interface IStmtVisitor<T>
 {
 	T VisitBlockStmt(Block stmt);
 	T VisitExpressionStmt(ExpressionStmt stmt);
+	T VisitFunctionStmt(Function stmt);
 	T VisitIfStmt(If stmt);
 	T VisitPrintStmt(Print stmt);
 	T VisitVarStmt(Var stmt);
@@ -44,6 +45,25 @@ class ExpressionStmt : Stmt
 	public override T Accept<T>(IStmtVisitor<T> visitor)
 	{
 		return visitor.VisitExpressionStmt(this);
+	}
+}
+
+class Function : Stmt
+{
+	public Function(Token name, List<Token> parameters, List<Stmt> body)
+	{
+		Name = name;
+		Parameters = parameters;
+		Body = body;
+	}
+
+	public Token Name { get; }
+	public List<Token> Parameters { get; }
+	public List<Stmt> Body { get; }
+
+	public override T Accept<T>(IStmtVisitor<T> visitor)
+	{
+		return visitor.VisitFunctionStmt(this);
 	}
 }
 

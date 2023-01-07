@@ -10,13 +10,13 @@ class Void
 
 class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 {
-    private readonly Environment globals = new Environment();
+    public Environment Globals { get; } = new Environment();
     private Environment environment;
 
     public Interpreter()
     {
-        globals.Define("clock", new Clock());
-        environment = globals;
+        Globals.Define("clock", new Clock());
+        environment = Globals;
     }
 
     public void Interpret(List<Stmt> statements)
@@ -185,6 +185,13 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitFunctionStmt(Function stmt)
+    {
+        var function = new LoxFunction(stmt);
+        environment.Define(stmt.Name.Lexeme, function);
+        return null;
+    }
+
     public Void? VisitIfStmt(If stmt)
     {
         if (IsTruthy(Evaluate(stmt.Condition)))
@@ -236,7 +243,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         stmt.Accept(this);
     }
 
-    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    public void ExecuteBlock(List<Stmt> statements, Environment environment)
     {
         var previous = this.environment;
         try

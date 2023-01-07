@@ -32,6 +32,10 @@ class Parser
     {
         try
         {
+            if (Match(TokenType.FUN))
+            {
+                return Function("function");
+            }
             if (Match(TokenType.VAR))
             {
                 return VarDeclaration();
@@ -181,6 +185,30 @@ class Parser
         var expr = Expression();
         Consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new ExpressionStmt(expr);
+    }
+
+    private Stmt Function(string kind)
+    {
+        var name = Consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
+        Consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name.");
+        var parameters = new List<Token>();
+        if (!Check(TokenType.RIGHT_PAREN))
+        {
+            do
+            {
+                if (parameters.Count >= 255)
+                {
+                    Error(Peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.Add(Consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (Match(TokenType.COMMA));
+        }
+        Consume(TokenType.RIGHT_PAREN, $"Expect ')' after parameters.");
+
+        Consume(TokenType.LEFT_BRACE, $"Expect '{{' after {kind} name.");
+        var body = Block();
+        return new Function(name, parameters, body);
     }
 
     private Stmt VarDeclaration()

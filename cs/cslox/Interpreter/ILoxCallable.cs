@@ -3,7 +3,7 @@ namespace cslox.Interpreter;
 
 interface ILoxCallable
 {
-    object Call(Interpreter interpreter, List<object> arguments);
+    object? Call(Interpreter interpreter, List<object> arguments);
     int Arity();
 }
 
