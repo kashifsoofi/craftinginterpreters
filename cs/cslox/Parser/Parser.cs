@@ -64,6 +64,10 @@ class Parser
         {
             return PrintStatement();
         }
+        if (Match(TokenType.RETURN))
+        {
+            return ReturnStatement();
+        }
         if (Match(TokenType.WHILE))
         {
             return WhileStatement();
@@ -151,6 +155,19 @@ class Parser
         Expr value = Expression();
         Consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new Print(value);
+    }
+
+    private Stmt ReturnStatement()
+    {
+        var keyword = Previous();
+        Expr? value = null;
+        if (!Check(TokenType.SEMICOLON))
+        {
+            value = Expression();
+        }
+
+        Consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+        return new Return(keyword, value);
     }
 
     private Stmt WhileStatement()

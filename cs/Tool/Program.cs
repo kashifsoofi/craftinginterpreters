@@ -20,6 +20,7 @@ var stmtTypes = new Dictionary<string, string[]>
     ["Function"] = new[] { "Token Name", "List<Token> Parameters", "List<Stmt> Body" },
     ["If"] = new[] { "Expr Condition", "Stmt ThenBranch", "Stmt? ElseBranch" },
     ["Print"] = new[] { "Expr Expression" },
+    ["Return"] = new[] { "Token Keyword", "Expr? Value" },
     ["Var"] = new[] { "Token Name", "Expr? Initializer" },
     ["While"] = new[] { "Expr Condition", "Stmt Body" }, 
 };

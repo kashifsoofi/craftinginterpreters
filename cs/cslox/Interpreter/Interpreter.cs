@@ -212,6 +212,17 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitReturnStmt(Return stmt)
+    {
+        object? value = null;
+        if (stmt.Value != null)
+        {
+            value = Evaluate(stmt.Value);
+        }
+
+        throw new ReturnValue(value);
+    }
+
     public Void? VisitWhileStmt(While stmt)
     {
         while (IsTruthy(stmt.Condition))
@@ -339,5 +350,15 @@ class RuntimeError : Exception
         : base(message)
     {
         Token = token;
+    }
+}
+
+class ReturnValue : Exception
+{
+    public object? Value { get; }
+
+    public ReturnValue(object? value)
+    {
+        Value = value;
     }
 }
