@@ -4,6 +4,7 @@ var types = new Dictionary<string, string[]>
 {
     ["Assign"] = new[] { "Token Name", "Expr Value" },
     ["Binary"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
+    ["Call"] = new[] { "Expr Callee", "Token Paren", "List<Expr> Arguments" },
     ["Grouping"] = new[] { "Expr Expression" },
     ["Literal"] = new[] { "object? Value" },
     ["Logical"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
@@ -16,8 +17,10 @@ var stmtTypes = new Dictionary<string, string[]>
 {
     ["Block"] = new[] { "List<Stmt> Statements" },
     ["ExpressionStmt"] = new[] { "Expr Expression" },
+    ["Function"] = new[] { "Token Name", "List<Token> Parameters", "List<Stmt> Body" },
     ["If"] = new[] { "Expr Condition", "Stmt ThenBranch", "Stmt? ElseBranch" },
     ["Print"] = new[] { "Expr Expression" },
+    ["Return"] = new[] { "Token Keyword", "Expr? Value" },
     ["Var"] = new[] { "Token Name", "Expr? Initializer" },
     ["While"] = new[] { "Expr Condition", "Stmt Body" }, 
 };

@@ -21,6 +21,11 @@ class AstPrinter : IExprVisitor<string>
         return Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
     }
 
+    public string VisitCallExpr(Call expr)
+    {
+        return Parenthesize2("call", expr.Callee, expr.Arguments);
+    }
+
     public string VisitGroupingExpr(Grouping expr)
     {
         return Parenthesize("group", expr.Expression);

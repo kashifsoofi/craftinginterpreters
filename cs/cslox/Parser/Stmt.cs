@@ -6,8 +6,10 @@ interface IStmtVisitor<T>
 {
 	T VisitBlockStmt(Block stmt);
 	T VisitExpressionStmt(ExpressionStmt stmt);
+	T VisitFunctionStmt(Function stmt);
 	T VisitIfStmt(If stmt);
 	T VisitPrintStmt(Print stmt);
+	T VisitReturnStmt(Return stmt);
 	T VisitVarStmt(Var stmt);
 	T VisitWhileStmt(While stmt);
 }
@@ -47,6 +49,25 @@ class ExpressionStmt : Stmt
 	}
 }
 
+class Function : Stmt
+{
+	public Function(Token name, List<Token> parameters, List<Stmt> body)
+	{
+		Name = name;
+		Parameters = parameters;
+		Body = body;
+	}
+
+	public Token Name { get; }
+	public List<Token> Parameters { get; }
+	public List<Stmt> Body { get; }
+
+	public override T Accept<T>(IStmtVisitor<T> visitor)
+	{
+		return visitor.VisitFunctionStmt(this);
+	}
+}
+
 class If : Stmt
 {
 	public If(Expr condition, Stmt thenbranch, Stmt? elsebranch)
@@ -78,6 +99,23 @@ class Print : Stmt
 	public override T Accept<T>(IStmtVisitor<T> visitor)
 	{
 		return visitor.VisitPrintStmt(this);
+	}
+}
+
+class Return : Stmt
+{
+	public Return(Token keyword, Expr? value)
+	{
+		Keyword = keyword;
+		Value = value;
+	}
+
+	public Token Keyword { get; }
+	public Expr? Value { get; }
+
+	public override T Accept<T>(IStmtVisitor<T> visitor)
+	{
+		return visitor.VisitReturnStmt(this);
 	}
 }
 
