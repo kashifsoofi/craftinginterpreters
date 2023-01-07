@@ -187,7 +187,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 
     public Void? VisitFunctionStmt(Function stmt)
     {
-        var function = new LoxFunction(stmt);
+        var function = new LoxFunction(stmt, environment);
         environment.Define(stmt.Name.Lexeme, function);
         return null;
     }
