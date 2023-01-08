@@ -12,6 +12,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 {
     public Environment Globals { get; } = new Environment();
     private Environment environment;
+    private readonly Dictionary<Expr, int> locals = new Dictionary<Expr, int>();
 
     public Interpreter()
     {
@@ -34,10 +35,22 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         }
     }
 
+    public void Resolve(Expr expr, int depth)
+    {
+        locals[expr] = depth;
+    }
+
     public object? VisitAssignExpr(Assign expr)
     {
         var value = Evaluate(expr.Value);
-        environment.Assign(expr.Name, expr.Value);
+        if (locals.TryGetValue(expr, out var distance))
+        {
+            environment.AssignAt(distance, expr.Name, value);
+        }
+        else
+        {
+            Globals.Assign(expr.Name, value);
+        }
         return value;
     }
 
@@ -170,7 +183,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 
     public object? VisitVariableExpr(Variable expr)
     {
-        return environment.Get(expr.Name);
+        return LookupVariable(expr.Name, expr);
     }
 
     public Void? VisitBlockStmt(Block stmt)
@@ -339,6 +352,16 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         }
 
         return value.ToString()!;
+    }
+
+    private object? LookupVariable(Token name, Expr expr)
+    {
+        if (locals.TryGetValue(expr, out var distance))
+        {
+            return environment.GetAt(distance, name.Lexeme);
+        }
+
+        return Globals.Get(name);
     }
 }
 
