@@ -59,7 +59,7 @@ public class Environment
         throw new RuntimeError(name, $"Undefined variable '{name.Lexeme}'.");
     }
 
-	public void AssignAt(int distance, Token name, object value)
+	public void AssignAt(int distance, Token name, object? value)
 	{
 		Ancestor(distance).values[name.Lexeme] = value;
 	}
