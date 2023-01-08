@@ -57,12 +57,22 @@ class Lox
 
     static void Run(string source)
     {
+        // Reset errors
+        hadError = false;
+        hadRuntimeError = false;
+
         var scanner = new Scanner(source);
         var tokens = scanner.ScanTokens();
         var parser = new Parser(tokens);
         var statements = parser.Parse();
 
         // Stop if there was a syntax error.
+        if (hadError) return;
+
+        var resolver = new Resolver(interpreter);
+        resolver.Resolve(statements);
+
+        // Stop if there was a resolution error.
         if (hadError) return;
 
         interpreter.Interpret(statements);
