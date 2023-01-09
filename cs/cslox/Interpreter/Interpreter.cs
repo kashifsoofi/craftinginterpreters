@@ -192,6 +192,14 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitClassStmt(Class stmt)
+    {
+        environment.Define(stmt.Name.Lexeme, null);
+        LoxClass klass = new LoxClass(stmt.Name.Lexeme);
+        environment.Assign(stmt.Name, klass);
+        return null;
+    }
+
     public Void? VisitExpressionStmt(ExpressionStmt stmt)
     {
         Evaluate(stmt.Expression);

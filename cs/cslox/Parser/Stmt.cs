@@ -5,6 +5,7 @@ namespace cslox.Parser;
 interface IStmtVisitor<T>
 {
 	T VisitBlockStmt(Block stmt);
+	T VisitClassStmt(Class stmt);
 	T VisitExpressionStmt(ExpressionStmt stmt);
 	T VisitFunctionStmt(Function stmt);
 	T VisitIfStmt(If stmt);
@@ -31,6 +32,23 @@ class Block : Stmt
 	public override T Accept<T>(IStmtVisitor<T> visitor)
 	{
 		return visitor.VisitBlockStmt(this);
+	}
+}
+
+class Class : Stmt
+{
+	public Class(Token name, List<Function> methods)
+	{
+		Name = name;
+		Methods = methods;
+	}
+
+	public Token Name { get; }
+	public List<Function> Methods { get; }
+
+	public override T Accept<T>(IStmtVisitor<T> visitor)
+	{
+		return visitor.VisitClassStmt(this);
 	}
 }
 

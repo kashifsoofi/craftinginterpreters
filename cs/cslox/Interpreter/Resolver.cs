@@ -98,6 +98,13 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitClassStmt(Class stmt)
+    {
+        Declare(stmt.Name);
+        Define(stmt.Name);
+        return null;
+    }
+
     public Void? VisitExpressionStmt(ExpressionStmt stmt)
     {
         Resolve(stmt.Expression);

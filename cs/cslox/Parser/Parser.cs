@@ -32,6 +32,10 @@ class Parser
     {
         try
         {
+            if (Match(TokenType.CLASS))
+            {
+                return ClassDeclaration();
+            }
             if (Match(TokenType.FUN))
             {
                 return Function("function");
@@ -202,6 +206,23 @@ class Parser
         var expr = Expression();
         Consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new ExpressionStmt(expr);
+    }
+
+    private Stmt ClassDeclaration()
+    {
+        var name = Consume(TokenType.IDENTIFIER, "Expect class name.");
+        Consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+        List<Function> methods = new List<Function>();
+        while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+        {
+            var method = Function("method") as Function;
+            methods.Add(method!);
+        }
+
+        Consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+
+        return new Class(name, methods);
     }
 
     private Stmt Function(string kind)
