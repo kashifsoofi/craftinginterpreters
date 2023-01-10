@@ -10,12 +10,19 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         None,
         Function,
-        Method,,
+        Method,
+    }
+
+    private enum ClassType
+    {
+        None,
+        Class,
     }
 
 	private readonly Interpreter interpreter;
     private readonly Stack<Dictionary<string, bool>> scopes = new Stack<Dictionary<string, bool>>();
     private FunctionType currentFunctionType = FunctionType.None;
+    private ClassType currentClassType = ClassType.None;
 
 	public Resolver(Interpreter interpreter)
 	{
@@ -87,6 +94,18 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitThisExpr(This expr)
+    {
+        if (currentClassType == ClassType.None)
+        {
+            Lox.Error(expr.Keyword, "Can't use 'this' outside of a class.");
+            return null;
+        }
+
+        ResolveLocal(expr, expr.Keyword);
+        return null;
+    }
+
     public Void? VisitUnaryExpr(Unary expr)
     {
         Resolve(expr.Right);
@@ -114,8 +133,14 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 
     public Void? VisitClassStmt(Class stmt)
     {
+        var enclosingClassType = currentClassType;
+        currentClassType = ClassType.Class;
+
         Declare(stmt.Name);
         Define(stmt.Name);
+
+        BeginScope();
+        scopes.Peek()["this"] = true;
 
         foreach (var method in stmt.Methods)
         {
@@ -123,6 +148,9 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
             ResolveFunction(method, declaration);
         }
 
+        EndScope();
+
+        currentClassType = enclosingClassType;
         return null;
     }
 

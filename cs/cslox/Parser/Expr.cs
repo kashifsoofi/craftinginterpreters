@@ -12,6 +12,7 @@ interface IExprVisitor<T>
 	T VisitLiteralExpr(Literal expr);
 	T VisitLogicalExpr(Logical expr);
 	T VisitSetExpr(Set expr);
+	T VisitThisExpr(This expr);
 	T VisitUnaryExpr(Unary expr);
 	T VisitVariableExpr(Variable expr);
 }
@@ -158,6 +159,21 @@ class Set : Expr
 	public override T Accept<T>(IExprVisitor<T> visitor)
 	{
 		return visitor.VisitSetExpr(this);
+	}
+}
+
+class This : Expr
+{
+	public This(Token keyword)
+	{
+		Keyword = keyword;
+	}
+
+	public Token Keyword { get; }
+
+	public override T Accept<T>(IExprVisitor<T> visitor)
+	{
+		return visitor.VisitThisExpr(this);
 	}
 }
 

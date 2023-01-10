@@ -39,6 +39,13 @@ class LoxFunction : ILoxCallable
         return null;
     }
 
+    public LoxFunction Bind(LoxInstance instance)
+    {
+        var environment = new Environment(closure);
+        environment.Define("this", instance);
+        return new LoxFunction(declaration, environment);
+    }
+
     public override string ToString()
     {
         return $"<fn {declaration.Name.Lexeme}>";

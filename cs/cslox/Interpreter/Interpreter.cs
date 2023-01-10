@@ -192,6 +192,11 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return expr.Value;
     }
 
+    public object? VisitThisExpr(This expr)
+    {
+        return LookupVariable(expr.Keyword, expr);
+    }
+
     public object? VisitUnaryExpr(Unary expr)
     {
         var right = Evaluate(expr.Right);

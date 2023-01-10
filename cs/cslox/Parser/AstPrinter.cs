@@ -55,6 +55,11 @@ class AstPrinter : IExprVisitor<string>
         return expr.Value.ToString()!;
     }
 
+    public string VisitThisExpr(This expr)
+    {
+        return "this";
+    }
+
     public string VisitUnaryExpr(Unary expr)
     {
         return Parenthesize(expr.Operator.Lexeme, expr.Right);
