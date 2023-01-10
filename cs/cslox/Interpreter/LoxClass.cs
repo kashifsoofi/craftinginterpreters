@@ -5,10 +5,12 @@ namespace cslox.Interpreter;
 class LoxClass : ILoxCallable
 {
 	public string Name { get; }
+    private Dictionary<string, LoxFunction> methods;
 
-	public LoxClass(string name)
+	public LoxClass(string name, Dictionary<string, LoxFunction> methods)
 	{
 		Name = name;
+        this.methods = methods;
 	}
 
     public int Arity()
@@ -20,6 +22,16 @@ class LoxClass : ILoxCallable
     {
         var instance = new LoxInstance(this);
         return instance;
+    }
+
+    public LoxFunction? FindMethod(string name)
+    {
+        if (methods.ContainsKey(name))
+        {
+            return methods[name];
+        }
+
+        return null;
     }
 
     public override string ToString()

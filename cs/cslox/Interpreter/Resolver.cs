@@ -10,6 +10,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         None,
         Function,
+        Method,,
     }
 
 	private readonly Interpreter interpreter;
@@ -115,6 +116,13 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         Declare(stmt.Name);
         Define(stmt.Name);
+
+        foreach (var method in stmt.Methods)
+        {
+            var declaration = FunctionType.Method;
+            ResolveFunction(method, declaration);
+        }
+
         return null;
     }
 

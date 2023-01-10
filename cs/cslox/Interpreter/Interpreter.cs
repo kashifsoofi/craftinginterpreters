@@ -221,7 +221,15 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
     public Void? VisitClassStmt(Class stmt)
     {
         environment.Define(stmt.Name.Lexeme, null);
-        LoxClass klass = new LoxClass(stmt.Name.Lexeme);
+
+        var methods = new Dictionary<string, LoxFunction>();
+        foreach (var method in stmt.Methods)
+        {
+            var function = new LoxFunction(method, environment);
+            methods[method.Name.Lexeme] = function;
+        }
+
+        LoxClass klass = new LoxClass(stmt.Name.Lexeme, methods);
         environment.Assign(stmt.Name, klass);
         return null;
     }
