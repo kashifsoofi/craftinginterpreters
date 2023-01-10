@@ -5,9 +5,11 @@ var types = new Dictionary<string, string[]>
     ["Assign"] = new[] { "Token Name", "Expr Value" },
     ["Binary"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
     ["Call"] = new[] { "Expr Callee", "Token Paren", "List<Expr> Arguments" },
+    ["Get"] = new[] { "Expr Object", "Token Name" },
     ["Grouping"] = new[] { "Expr Expression" },
     ["Literal"] = new[] { "object? Value" },
     ["Logical"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
+    ["Set"] = new[] { "Expr Object", "Token Name", "Expr Value" },
     ["Unary"] = new[] { "Token Operator", "Expr Right" },
     ["Variable"] = new[] { "Token Name" },
 };
@@ -62,7 +64,7 @@ static void DefineType(StreamWriter writer, string baseName, string className, s
         fieldNames.Add(typeAndName[1]);
 
         var parameterName = typeAndName[1].ToLower();
-        if (parameterName == "operator")
+        if (parameterName == "operator" || parameterName == "object")
         {
             parameterName = $"@{parameterName}";
         }
@@ -81,7 +83,7 @@ static void DefineType(StreamWriter writer, string baseName, string className, s
     foreach (var fieldName in fieldNames)
     {
         var parameterName = fieldName.ToLower();
-        if (parameterName == "operator")
+        if (parameterName == "operator" || parameterName == "object")
         {
             parameterName = $"@{parameterName}";
         }

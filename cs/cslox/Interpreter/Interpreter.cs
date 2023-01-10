@@ -134,6 +134,18 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return function.Call(this, arguments);
     }
 
+    public object? VisitGetExpr(Get expr)
+    {
+        var @object = Evaluate(expr.Object);
+        var klass = @object as LoxInstance;
+        if (klass != null)
+        {
+            return klass.Get(expr.Name);
+        }
+
+        throw new RuntimeError(expr.Name, "Only instances have properties.");
+    }
+
     public object? VisitGroupingExpr(Grouping expr)
     {
         return Evaluate(expr.Expression);
@@ -159,6 +171,20 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         }
 
         return Evaluate(expr.Right);
+    }
+
+    public object? VisitSetExpr(Set expr)
+    {
+        var @object = Evaluate(expr.Object);
+
+        if (@object is not LoxInstance)
+        {
+            throw new RuntimeError(expr.Name, "Only instances have fields.");
+        }
+
+        var value = Evaluate(expr.Value);
+        ((LoxInstance)@object).Set(expr.Name, value);
+        return value;
     }
 
     public object? VisitLiteralExpr(Literal expr)

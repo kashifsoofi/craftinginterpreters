@@ -55,6 +55,12 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitGetExpr(Get expr)
+    {
+        Resolve(expr.Object);
+        return null;
+    }
+
     public Void? VisitGroupingExpr(Grouping expr)
     {
         Resolve(expr.Expression);
@@ -70,6 +76,13 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         Resolve(expr.Left);
         Resolve(expr.Right);
+        return null;
+    }
+
+    public Void? VisitSetExpr(Set expr)
+    {
+        Resolve(expr.Value);
+        Resolve(expr.Object);
         return null;
     }
 

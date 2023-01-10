@@ -322,6 +322,11 @@ class Parser
                 var name = ((Variable)expr).Name;
                 return new Assign(name, value);
             }
+            else if (expr is Get)
+            {
+                var get = (Get)expr;
+                return new Set(get.Object, get.Name, value);
+            }
         }
 
         return expr;
@@ -440,6 +445,11 @@ class Parser
             if (Match(TokenType.LEFT_PAREN))
             {
                 expr = FinishCall(expr);
+            }
+            else if (Match(TokenType.DOT))
+            {
+                var name = Consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                expr = new Get(expr, name);
             }
             else
             {
