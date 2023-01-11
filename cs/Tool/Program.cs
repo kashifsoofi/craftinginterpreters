@@ -19,7 +19,7 @@ DefineAst(outputDir, "Expr", types);
 var stmtTypes = new Dictionary<string, string[]>
 {
     ["Block"] = new[] { "List<Stmt> Statements" },
-    ["Class"] = new[] { "Token Name", "List<Function> Methods" },
+    ["Class"] = new[] { "Token Name", "Variable? Superclass", "List<Function> Methods" },
     ["ExpressionStmt"] = new[] { "Expr Expression" },
     ["Function"] = new[] { "Token Name", "List<Token> Parameters", "List<Stmt> Body" },
     ["If"] = new[] { "Expr Condition", "Stmt ThenBranch", "Stmt? ElseBranch" },

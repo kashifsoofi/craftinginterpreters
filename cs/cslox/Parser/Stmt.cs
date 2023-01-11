@@ -37,13 +37,15 @@ class Block : Stmt
 
 class Class : Stmt
 {
-	public Class(Token name, List<Function> methods)
+	public Class(Token name, Variable? superclass, List<Function> methods)
 	{
 		Name = name;
+		Superclass = superclass;
 		Methods = methods;
 	}
 
 	public Token Name { get; }
+	public Variable? Superclass { get; }
 	public List<Function> Methods { get; }
 
 	public override T Accept<T>(IStmtVisitor<T> visitor)
