@@ -10,11 +10,20 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         None,
         Function,
+        Initializer,
+        Method,
+    }
+
+    private enum ClassType
+    {
+        None,
+        Class,
     }
 
 	private readonly Interpreter interpreter;
     private readonly Stack<Dictionary<string, bool>> scopes = new Stack<Dictionary<string, bool>>();
     private FunctionType currentFunctionType = FunctionType.None;
+    private ClassType currentClassType = ClassType.None;
 
 	public Resolver(Interpreter interpreter)
 	{
@@ -55,6 +64,12 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitGetExpr(Get expr)
+    {
+        Resolve(expr.Object);
+        return null;
+    }
+
     public Void? VisitGroupingExpr(Grouping expr)
     {
         Resolve(expr.Expression);
@@ -70,6 +85,25 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         Resolve(expr.Left);
         Resolve(expr.Right);
+        return null;
+    }
+
+    public Void? VisitSetExpr(Set expr)
+    {
+        Resolve(expr.Value);
+        Resolve(expr.Object);
+        return null;
+    }
+
+    public Void? VisitThisExpr(This expr)
+    {
+        if (currentClassType == ClassType.None)
+        {
+            Lox.Error(expr.Keyword, "Can't use 'this' outside of a class.");
+            return null;
+        }
+
+        ResolveLocal(expr, expr.Keyword);
         return null;
     }
 
@@ -95,6 +129,33 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         BeginScope();
         Resolve(stmt.Statements);
         EndScope();
+        return null;
+    }
+
+    public Void? VisitClassStmt(Class stmt)
+    {
+        var enclosingClassType = currentClassType;
+        currentClassType = ClassType.Class;
+
+        Declare(stmt.Name);
+        Define(stmt.Name);
+
+        BeginScope();
+        scopes.Peek()["this"] = true;
+
+        foreach (var method in stmt.Methods)
+        {
+            var declaration = FunctionType.Method;
+            if (method.Name.Lexeme == "this")
+            {
+                declaration = FunctionType.Initializer;
+            }
+            ResolveFunction(method, declaration);
+        }
+
+        EndScope();
+
+        currentClassType = enclosingClassType;
         return null;
     }
 
@@ -139,6 +200,11 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 
         if (stmt.Value != null)
         {
+            if (currentFunctionType == FunctionType.Initializer)
+            {
+                Lox.Error(stmt.Keyword, "Can't return a value from an initializer.");
+            }
+
             Resolve(stmt.Value);
         }
 

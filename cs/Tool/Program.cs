@@ -5,9 +5,12 @@ var types = new Dictionary<string, string[]>
     ["Assign"] = new[] { "Token Name", "Expr Value" },
     ["Binary"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
     ["Call"] = new[] { "Expr Callee", "Token Paren", "List<Expr> Arguments" },
+    ["Get"] = new[] { "Expr Object", "Token Name" },
     ["Grouping"] = new[] { "Expr Expression" },
     ["Literal"] = new[] { "object? Value" },
     ["Logical"] = new[] { "Expr Left", "Token Operator", "Expr Right" },
+    ["Set"] = new[] { "Expr Object", "Token Name", "Expr Value" },
+    ["This"] = new[] { "Token Keyword" },
     ["Unary"] = new[] { "Token Operator", "Expr Right" },
     ["Variable"] = new[] { "Token Name" },
 };
@@ -16,6 +19,7 @@ DefineAst(outputDir, "Expr", types);
 var stmtTypes = new Dictionary<string, string[]>
 {
     ["Block"] = new[] { "List<Stmt> Statements" },
+    ["Class"] = new[] { "Token Name", "List<Function> Methods" },
     ["ExpressionStmt"] = new[] { "Expr Expression" },
     ["Function"] = new[] { "Token Name", "List<Token> Parameters", "List<Stmt> Body" },
     ["If"] = new[] { "Expr Condition", "Stmt ThenBranch", "Stmt? ElseBranch" },
@@ -61,7 +65,7 @@ static void DefineType(StreamWriter writer, string baseName, string className, s
         fieldNames.Add(typeAndName[1]);
 
         var parameterName = typeAndName[1].ToLower();
-        if (parameterName == "operator")
+        if (parameterName == "operator" || parameterName == "object")
         {
             parameterName = $"@{parameterName}";
         }
@@ -80,7 +84,7 @@ static void DefineType(StreamWriter writer, string baseName, string className, s
     foreach (var fieldName in fieldNames)
     {
         var parameterName = fieldName.ToLower();
-        if (parameterName == "operator")
+        if (parameterName == "operator" || parameterName == "object")
         {
             parameterName = $"@{parameterName}";
         }

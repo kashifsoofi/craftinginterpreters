@@ -26,6 +26,11 @@ class AstPrinter : IExprVisitor<string>
         return Parenthesize2("call", expr.Callee, expr.Arguments);
     }
 
+    public string VisitGetExpr(Get expr)
+    {
+        return Parenthesize2(".", expr.Object, expr.Name.Lexeme);
+    }
+
     public string VisitGroupingExpr(Grouping expr)
     {
         return Parenthesize("group", expr.Expression);
@@ -36,6 +41,11 @@ class AstPrinter : IExprVisitor<string>
         return Parenthesize(expr.Operator.Lexeme, expr.Left, expr.Right);
     }
 
+    public string VisitSetExpr(Set expr)
+    {
+        return Parenthesize2("=", expr.Object, expr.Name.Lexeme, expr.Value);
+    }
+
     public string VisitLiteralExpr(Literal expr)
     {
         if (expr.Value == null)
@@ -43,6 +53,11 @@ class AstPrinter : IExprVisitor<string>
             return "nil";
         }
         return expr.Value.ToString()!;
+    }
+
+    public string VisitThisExpr(This expr)
+    {
+        return "this";
     }
 
     public string VisitUnaryExpr(Unary expr)

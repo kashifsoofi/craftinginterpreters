@@ -32,6 +32,10 @@ class Parser
     {
         try
         {
+            if (Match(TokenType.CLASS))
+            {
+                return ClassDeclaration();
+            }
             if (Match(TokenType.FUN))
             {
                 return Function("function");
@@ -204,6 +208,23 @@ class Parser
         return new ExpressionStmt(expr);
     }
 
+    private Stmt ClassDeclaration()
+    {
+        var name = Consume(TokenType.IDENTIFIER, "Expect class name.");
+        Consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+        List<Function> methods = new List<Function>();
+        while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+        {
+            var method = Function("method") as Function;
+            methods.Add(method!);
+        }
+
+        Consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+
+        return new Class(name, methods);
+    }
+
     private Stmt Function(string kind)
     {
         var name = Consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
@@ -300,6 +321,11 @@ class Parser
             {
                 var name = ((Variable)expr).Name;
                 return new Assign(name, value);
+            }
+            else if (expr is Get)
+            {
+                var get = (Get)expr;
+                return new Set(get.Object, get.Name, value);
             }
         }
 
@@ -420,6 +446,11 @@ class Parser
             {
                 expr = FinishCall(expr);
             }
+            else if (Match(TokenType.DOT))
+            {
+                var name = Consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                expr = new Get(expr, name);
+            }
             else
             {
                 break;
@@ -469,6 +500,11 @@ class Parser
         if (Match(TokenType.NUMBER, TokenType.STRING))
         {
             return new Literal(Previous().Literal);
+        }
+
+        if (Match(TokenType.THIS))
+        {
+            return new This(Previous());
         }
 
         if (Match(TokenType.IDENTIFIER))
