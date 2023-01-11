@@ -18,6 +18,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         None,
         Class,
+        Subclass,
     }
 
 	private readonly Interpreter interpreter;
@@ -95,6 +96,21 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitSuperExpr(Super expr)
+    {
+        if (currentClassType == ClassType.None)
+        {
+            Lox.Error(expr.Keyword, "Can't use 'super' outside of a class.");
+        }
+        else if (currentClassType != ClassType.Subclass)
+        {
+            Lox.Error(expr.Keyword, "Can't use 'super' in a class with no superclass.");
+        }
+
+        ResolveLocal(expr, expr.Keyword);
+        return null;
+    }
+
     public Void? VisitThisExpr(This expr)
     {
         if (currentClassType == ClassType.None)
@@ -148,7 +164,14 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 
         if (stmt.Superclass != null)
         {
+            currentClassType = ClassType.Subclass;
             Resolve(stmt.Superclass);
+        }
+
+        if (stmt.Superclass != null)
+        {
+            BeginScope();
+            scopes.Peek()["super"] = true;
         }
 
         BeginScope();
@@ -165,6 +188,11 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         }
 
         EndScope();
+
+        if (stmt.Superclass != null)
+        {
+            EndScope();
+        }
 
         currentClassType = enclosingClassType;
         return null;

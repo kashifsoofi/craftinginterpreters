@@ -46,6 +46,11 @@ class AstPrinter : IExprVisitor<string>
         return Parenthesize2("=", expr.Object, expr.Name.Lexeme, expr.Value);
     }
 
+    public string VisitSuperExpr(Super expr)
+    {
+        return Parenthesize2("super", expr.Method);
+    }
+
     public string VisitLiteralExpr(Literal expr)
     {
         if (expr.Value == null)

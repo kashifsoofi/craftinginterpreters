@@ -187,6 +187,22 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return value;
     }
 
+    public object? VisitSuperExpr(Super expr)
+    {
+        var distance = locals[expr];
+        var superclass = (LoxClass)environment.GetAt(distance!, "super")!;
+
+        var @object = (LoxInstance)environment.GetAt(distance - 1, "this")!;
+
+        var method = superclass.FindMethod(expr.Method.Lexeme);
+        if (method == null)
+        {
+            throw new RuntimeError(expr.Method, $"Undefined property '{expr.Method.Lexeme}'.");
+        }
+
+        return method.Bind(@object);
+    }
+
     public object? VisitLiteralExpr(Literal expr)
     {
         return expr.Value;
@@ -237,6 +253,12 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 
         environment.Define(stmt.Name.Lexeme, null);
 
+        if (stmt.Superclass != null)
+        {
+            environment = new Environment(environment);
+            environment.Define("super", superclass);
+        }
+
         var methods = new Dictionary<string, LoxFunction>();
         foreach (var method in stmt.Methods)
         {
@@ -245,6 +267,12 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         }
 
         LoxClass klass = new LoxClass(stmt.Name.Lexeme, superclass as LoxClass, methods);
+
+        if (stmt.Superclass != null)
+        {
+            environment = environment.Enclosing!;
+        }
+
         environment.Assign(stmt.Name, klass);
         return null;
     }

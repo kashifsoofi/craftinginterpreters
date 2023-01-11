@@ -50,4 +50,4 @@ arguments      → expression ( "," expression )* ;
 primary        → "true" | "false" | "nil"
                | NUMBER | STRING
                | "(" expression ")"
-               | IDENTIFIER ;
+               | "super" "." IDENTIFIER ;
