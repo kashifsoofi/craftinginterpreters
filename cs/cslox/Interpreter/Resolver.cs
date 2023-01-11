@@ -10,6 +10,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         None,
         Function,
+        Initializer,
         Method,
     }
 
@@ -145,6 +146,10 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         foreach (var method in stmt.Methods)
         {
             var declaration = FunctionType.Method;
+            if (method.Name.Lexeme == "this")
+            {
+                declaration = FunctionType.Initializer;
+            }
             ResolveFunction(method, declaration);
         }
 
@@ -195,6 +200,11 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 
         if (stmt.Value != null)
         {
+            if (currentFunctionType == FunctionType.Initializer)
+            {
+                Lox.Error(stmt.Keyword, "Can't return a value from an initializer.");
+            }
+
             Resolve(stmt.Value);
         }
 
