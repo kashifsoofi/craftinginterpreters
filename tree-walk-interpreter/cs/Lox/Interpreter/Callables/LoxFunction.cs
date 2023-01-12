@@ -1,7 +1,7 @@
 ﻿using System;
-using cslox.Parser;
+using Lox.Parser;
 
-namespace cslox.Interpreter;
+namespace Lox.Interpreter.Callables;
 
 class LoxFunction : ILoxCallable
 {

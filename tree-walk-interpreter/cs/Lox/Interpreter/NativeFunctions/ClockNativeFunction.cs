@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace cslox.Interpreter;
+namespace Lox.Interpreter.Callables;
 
-class Clock : ILoxCallable
+internal class ClockNativeFunction : ILoxCallable
 {
     public int Arity()
     {

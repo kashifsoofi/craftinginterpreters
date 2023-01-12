@@ -1,7 +1,8 @@
 ﻿using System;
-using cslox.Scanning;
+using Lox.Scanner;
+using Lox.Interpreter.Callables;
 
-namespace cslox.Interpreter;
+namespace Lox.Interpreter;
 
 class LoxInstance
 {

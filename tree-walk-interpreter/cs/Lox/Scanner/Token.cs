@@ -1,5 +1,5 @@
 ﻿using System;
-namespace cslox.Scanning;
+namespace Lox.Scanner;
 
 public class Token
 {

@@ -1,6 +1,6 @@
-using cslox.Scanning;
+using Lox.Scanner;
 
-namespace cslox.Parser;
+namespace Lox.Parser;
 
 interface IExprVisitor<T>
 {

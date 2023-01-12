@@ -1,7 +1,7 @@
 ﻿using System;
-namespace cslox.Interpreter;
+namespace Lox.Interpreter.Callables;
 
-interface ILoxCallable
+internal interface ILoxCallable
 {
     object? Call(Interpreter interpreter, List<object> arguments);
     int Arity();
