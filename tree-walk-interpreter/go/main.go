@@ -24,7 +24,6 @@ func main() {
 		runPrompt()
 	}
 
-
 }
 
 func runFile(path string) {
