@@ -1,12 +1,8 @@
-﻿using Lox.Parser;
+﻿using Lox.Interpreter.Callables;
+using Lox.Parser;
 using Lox.Scanner;
 
 namespace Lox.Interpreter;
-
-class Void
-{
-    private Void() { }
-}
 
 class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 {
@@ -16,7 +12,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 
     public Interpreter()
     {
-        Globals.Define("clock", new Clock());
+        Globals.Define("clock", new ClockNativeFunction());
         environment = Globals;
     }
 
@@ -452,26 +448,5 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         }
 
         return Globals.Get(name);
-    }
-}
-
-class RuntimeError : Exception
-{
-    public Token Token { get; }
-
-    public RuntimeError(Token token, string message)
-        : base(message)
-    {
-        Token = token;
-    }
-}
-
-class ReturnValue : Exception
-{
-    public object? Value { get; }
-
-    public ReturnValue(object? value)
-    {
-        Value = value;
     }
 }

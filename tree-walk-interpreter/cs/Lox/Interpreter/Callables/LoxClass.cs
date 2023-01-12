@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Lox.Interpreter;
+namespace Lox.Interpreter.Callables;
 
 class LoxClass : ILoxCallable
 {

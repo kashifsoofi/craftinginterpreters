@@ -1,5 +1,6 @@
 ﻿using System;
 using Lox.Scanner;
+using Lox.Interpreter.Callables;
 
 namespace Lox.Interpreter;
 

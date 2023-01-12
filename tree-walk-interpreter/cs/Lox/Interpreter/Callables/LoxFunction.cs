@@ -1,7 +1,7 @@
 ﻿using System;
 using Lox.Parser;
 
-namespace Lox.Interpreter;
+namespace Lox.Interpreter.Callables;
 
 class LoxFunction : ILoxCallable
 {

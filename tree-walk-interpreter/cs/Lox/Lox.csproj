@@ -14,9 +14,13 @@
   <ItemGroup>
     <None Remove="Parser\" />
     <None Remove="Interpreter\" />
+    <None Remove="Interpreter\Callables\" />
+    <None Remove="Interpreter\NativeFunctions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Parser\" />
     <Folder Include="Interpreter\" />
+    <Folder Include="Interpreter\Callables\" />
+    <Folder Include="Interpreter\NativeFunctions\" />
   </ItemGroup>
 </Project>
