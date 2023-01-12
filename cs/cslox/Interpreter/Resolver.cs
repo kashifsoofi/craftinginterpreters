@@ -319,13 +319,16 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 
     private void ResolveLocal(Expr expr, Token name)
     {
-        for (var i = scopes.Count - 1; i >= 0; i--)
+        var distance = 0;
+        foreach (var scope in scopes)
         {
-            if (scopes.ElementAt(i).ContainsKey(name.Lexeme))
+            if (scope.ContainsKey(name.Lexeme))
             {
-                interpreter.Resolve(expr, scopes.Count - 1 - i);
+                interpreter.Resolve(expr, distance);
                 return;
             }
+
+            distance++;
         }
     }
 
