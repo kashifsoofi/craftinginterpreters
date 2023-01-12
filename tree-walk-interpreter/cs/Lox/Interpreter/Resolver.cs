@@ -1,8 +1,8 @@
 ﻿using System;
-using cslox.Parser;
-using cslox.Scanning;
+using Lox.Parser;
+using Lox.Scanner;
 
-namespace cslox.Interpreter;
+namespace Lox.Interpreter;
 
 class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 {
@@ -100,11 +100,11 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         if (currentClassType == ClassType.None)
         {
-            Lox.Error(expr.Keyword, "Can't use 'super' outside of a class.");
+            Program.Error(expr.Keyword, "Can't use 'super' outside of a class.");
         }
         else if (currentClassType != ClassType.Subclass)
         {
-            Lox.Error(expr.Keyword, "Can't use 'super' in a class with no superclass.");
+            Program.Error(expr.Keyword, "Can't use 'super' in a class with no superclass.");
         }
 
         ResolveLocal(expr, expr.Keyword);
@@ -115,7 +115,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         if (currentClassType == ClassType.None)
         {
-            Lox.Error(expr.Keyword, "Can't use 'this' outside of a class.");
+            Program.Error(expr.Keyword, "Can't use 'this' outside of a class.");
             return null;
         }
 
@@ -136,7 +136,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         {
             if (defined == false)
             {
-                Lox.Error(expr.Name, "Can't read local variable in its own initializer.");
+                Program.Error(expr.Name, "Can't read local variable in its own initializer.");
             }
         }
 
@@ -163,7 +163,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         if (stmt.Superclass != null &&
             stmt.Name.Lexeme == stmt.Superclass.Name.Lexeme)
         {
-            Lox.Error(stmt.Superclass.Name, "A class can't inherit from itself.");
+            Program.Error(stmt.Superclass.Name, "A class can't inherit from itself.");
         }
 
         if (stmt.Superclass != null)
@@ -238,14 +238,14 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         if (currentFunctionType == FunctionType.None)
         {
-            Lox.Error(stmt.Keyword, "Can't return from top-level code.");
+            Program.Error(stmt.Keyword, "Can't return from top-level code.");
         }
 
         if (stmt.Value != null)
         {
             if (currentFunctionType == FunctionType.Initializer)
             {
-                Lox.Error(stmt.Keyword, "Can't return a value from an initializer.");
+                Program.Error(stmt.Keyword, "Can't return a value from an initializer.");
             }
 
             Resolve(stmt.Value);
@@ -302,7 +302,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         var scope = scopes.Peek();
         if (scope.ContainsKey(name.Lexeme))
         {
-            Lox.Error(name, "Already a variable with this name in this scope.");
+            Program.Error(name, "Already a variable with this name in this scope.");
         }
 
         scope[name.Lexeme] = false;

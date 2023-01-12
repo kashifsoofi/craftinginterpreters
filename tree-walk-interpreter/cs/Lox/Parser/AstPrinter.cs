@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Text;
-using cslox.Scanning;
+using Lox.Scanner;
 
-namespace cslox.Parser;
+namespace Lox.Parser;
 
 class AstPrinter : IExprVisitor<string>
 {

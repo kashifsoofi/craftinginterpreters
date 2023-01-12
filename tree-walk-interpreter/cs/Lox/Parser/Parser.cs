@@ -1,7 +1,7 @@
 ﻿using System;
-using cslox.Scanning;
+using Lox.Scanner;
 
-namespace cslox.Parser;
+namespace Lox.Parser;
 
 class Parser
 {
@@ -551,7 +551,7 @@ class Parser
 
     private ParseError Error(Token token, string message)
     {
-        Lox.Error(token, message);
+        Program.Error(token, message);
         return new ParseError();
     }
 

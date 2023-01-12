@@ -1,5 +1,5 @@
 ﻿using System;
-namespace cslox.Interpreter;
+namespace Lox.Interpreter;
 
 interface ILoxCallable
 {

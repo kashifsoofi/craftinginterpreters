@@ -5,19 +5,17 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <StartupObject>Lox</StartupObject>
+    <StartupObject>Program</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Scanning\" />
     <None Remove="Parser\" />
     <None Remove="Interpreter\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Scanning\" />
     <Folder Include="Parser\" />
     <Folder Include="Interpreter\" />
   </ItemGroup>

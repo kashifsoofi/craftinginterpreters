@@ -1,7 +1,7 @@
-﻿using cslox.Parser;
-using cslox.Scanning;
+﻿using Lox.Parser;
+using Lox.Scanner;
 
-namespace cslox.Interpreter;
+namespace Lox.Interpreter;
 
 class Void
 {
@@ -31,7 +31,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         }
         catch (RuntimeError error)
         {
-            Lox.RuntimeError(error);
+            Program.RuntimeError(error);
         }
     }
 

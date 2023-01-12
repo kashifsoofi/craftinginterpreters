@@ -1,8 +1,8 @@
-﻿using cslox.Interpreter;
-using cslox.Parser;
-using cslox.Scanning;
+﻿using Lox.Interpreter;
+using Lox.Parser;
+using Lox.Scanner;
 
-class Lox
+class Program
 {
     static Interpreter interpreter = new Interpreter();
     static bool hadError = false;

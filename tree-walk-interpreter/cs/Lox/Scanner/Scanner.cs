@@ -1,4 +1,4 @@
-﻿namespace cslox.Scanning;
+﻿namespace Lox.Scanner;
 
 using static TokenType;
 
@@ -106,7 +106,7 @@ class Scanner
 
 		if (IsAtEnd())
 		{
-			Lox.Error(line, "Unterminated string.");
+			Program.Error(line, "Unterminated string.");
 			return;
 		}
 
@@ -194,7 +194,7 @@ class Scanner
                     break;
             }
         }
-		Lox.Error(line, "Unclosed block comment");
+		Program.Error(line, "Unclosed block comment");
     }
 
     private void ScanToken()
@@ -263,7 +263,7 @@ class Scanner
 				}
 				else
 				{
-					Lox.Error(line, "Unexpected character.");
+					Program.Error(line, "Unexpected character.");
 				}
 				break;
 		}

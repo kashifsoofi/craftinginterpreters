@@ -1,5 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
-var outputDir = "../../../../cslox/Parser";
+var outputDir = "../../../../Lox/Parser";
 var types = new Dictionary<string, string[]>
 {
     ["Assign"] = new[] { "Token Name", "Expr Value" },
@@ -37,9 +37,9 @@ static void DefineAst(string outputDir, string baseName, Dictionary<string, stri
     FileStream stream = new FileStream(path, FileMode.Create);
     using var writer = new StreamWriter(stream);
     
-    writer.WriteLine("using cslox.Scanning;");
+    writer.WriteLine("using Lox.Scanner;");
     writer.WriteLine("");
-    writer.WriteLine("namespace cslox.Parser;");
+    writer.WriteLine("namespace Lox.Parser;");
 
     DefineVisitor(writer, baseName, types);
 
