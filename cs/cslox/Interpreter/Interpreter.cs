@@ -323,7 +323,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 
     public Void? VisitWhileStmt(While stmt)
     {
-        while (IsTruthy(stmt.Condition))
+        while (IsTruthy(Evaluate(stmt.Condition)))
         {
             Execute(stmt.Body);
         }

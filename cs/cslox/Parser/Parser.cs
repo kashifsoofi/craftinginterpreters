@@ -251,7 +251,7 @@ class Parser
         }
         Consume(TokenType.RIGHT_PAREN, $"Expect ')' after parameters.");
 
-        Consume(TokenType.LEFT_BRACE, $"Expect '{{' after {kind} name.");
+        Consume(TokenType.LEFT_BRACE, $"Expect '{{' before {kind} body.");
         var body = Block();
         return new Function(name, parameters, body);
     }

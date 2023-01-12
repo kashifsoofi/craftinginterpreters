@@ -184,7 +184,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         foreach (var method in stmt.Methods)
         {
             var declaration = FunctionType.Method;
-            if (method.Name.Lexeme == "this")
+            if (method.Name.Lexeme == "init")
             {
                 declaration = FunctionType.Initializer;
             }
@@ -302,7 +302,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         var scope = scopes.Peek();
         if (scope.ContainsKey(name.Lexeme))
         {
-            Lox.Error(name, "Already a vairable with this name in this scope.");
+            Lox.Error(name, "Already a variable with this name in this scope.");
         }
 
         scope[name.Lexeme] = false;
