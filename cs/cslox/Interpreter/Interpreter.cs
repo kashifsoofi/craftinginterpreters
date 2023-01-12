@@ -90,7 +90,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
                 {
                     return (string)left + (string)right;
                 }
-                throw new RuntimeError(expr.Operator, "Operands must be two numbers or two strings");
+                throw new RuntimeError(expr.Operator, "Operands must be two numbers or two strings.");
             case TokenType.SLASH:
                 CheckNumberOperands(expr.Operator, left, right);
                 if ((double)right! == 0)
@@ -187,6 +187,22 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
         return value;
     }
 
+    public object? VisitSuperExpr(Super expr)
+    {
+        var distance = locals[expr];
+        var superclass = (LoxClass)environment.GetAt(distance!, "super")!;
+
+        var @object = (LoxInstance)environment.GetAt(distance - 1, "this")!;
+
+        var method = superclass.FindMethod(expr.Method.Lexeme);
+        if (method == null)
+        {
+            throw new RuntimeError(expr.Method, $"Undefined property '{expr.Method.Lexeme}'.");
+        }
+
+        return method.Bind(@object);
+    }
+
     public object? VisitLiteralExpr(Literal expr)
     {
         return expr.Value;
@@ -225,7 +241,23 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 
     public Void? VisitClassStmt(Class stmt)
     {
+        object? superclass = null;
+        if (stmt.Superclass != null)
+        {
+            superclass = Evaluate(stmt.Superclass);
+            if (superclass is not LoxClass)
+            {
+                throw new RuntimeError(stmt.Superclass.Name, "Superclass must be a class.");
+            }
+        }
+
         environment.Define(stmt.Name.Lexeme, null);
+
+        if (stmt.Superclass != null)
+        {
+            environment = new Environment(environment);
+            environment.Define("super", superclass);
+        }
 
         var methods = new Dictionary<string, LoxFunction>();
         foreach (var method in stmt.Methods)
@@ -234,7 +266,13 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
             methods[method.Name.Lexeme] = function;
         }
 
-        LoxClass klass = new LoxClass(stmt.Name.Lexeme, methods);
+        LoxClass klass = new LoxClass(stmt.Name.Lexeme, superclass as LoxClass, methods);
+
+        if (stmt.Superclass != null)
+        {
+            environment = environment.Enclosing!;
+        }
+
         environment.Assign(stmt.Name, klass);
         return null;
     }
@@ -285,7 +323,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
 
     public Void? VisitWhileStmt(While stmt)
     {
-        while (IsTruthy(stmt.Condition))
+        while (IsTruthy(Evaluate(stmt.Condition)))
         {
             Execute(stmt.Body);
         }
@@ -396,6 +434,11 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
                 text = text.Substring(0, text.Length - 2);
             }
             return text;
+        }
+
+        if (value is bool)
+        {
+            return ((bool)value).ToString().ToLower();
         }
 
         return value.ToString()!;

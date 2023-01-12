@@ -86,7 +86,7 @@ class Scanner
 
 	private char PeekNext()
 	{
-		if (current + 1 > source.Length)
+		if (current + 1 >= source.Length)
 		{
 			return '\0';
 		}

@@ -211,6 +211,13 @@ class Parser
     private Stmt ClassDeclaration()
     {
         var name = Consume(TokenType.IDENTIFIER, "Expect class name.");
+        Variable? superclass = null;
+        if (Match(TokenType.LESS))
+        {
+            Consume(TokenType.IDENTIFIER, "Expect superclass name.");
+            superclass = new Variable(Previous());
+        }
+
         Consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
 
         List<Function> methods = new List<Function>();
@@ -222,7 +229,7 @@ class Parser
 
         Consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
 
-        return new Class(name, methods);
+        return new Class(name, superclass, methods);
     }
 
     private Stmt Function(string kind)
@@ -244,7 +251,7 @@ class Parser
         }
         Consume(TokenType.RIGHT_PAREN, $"Expect ')' after parameters.");
 
-        Consume(TokenType.LEFT_BRACE, $"Expect '{{' after {kind} name.");
+        Consume(TokenType.LEFT_BRACE, $"Expect '{{' before {kind} body.");
         var body = Block();
         return new Function(name, parameters, body);
     }
@@ -327,6 +334,8 @@ class Parser
                 var get = (Get)expr;
                 return new Set(get.Object, get.Name, value);
             }
+
+            Error(equals, "Invalid assignment target.");
         }
 
         return expr;
@@ -502,6 +511,14 @@ class Parser
             return new Literal(Previous().Literal);
         }
 
+        if (Match(TokenType.SUPER))
+        {
+            var keyword = Previous();
+            Consume(TokenType.DOT, "Expect '.' after 'super'.");
+            var method = Consume(TokenType.IDENTIFIER, "Expect superclass method name.");
+            return new Super(keyword, method);
+        }
+
         if (Match(TokenType.THIS))
         {
             return new This(Previous());
@@ -561,9 +578,9 @@ class Parser
                 case TokenType.RETURN:
                     return;
             }
-        }
 
-        Advance();
+            Advance();
+        }
     }
 }
 

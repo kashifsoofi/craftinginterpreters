@@ -18,6 +18,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
     {
         None,
         Class,
+        Subclass,
     }
 
 	private readonly Interpreter interpreter;
@@ -95,6 +96,21 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         return null;
     }
 
+    public Void? VisitSuperExpr(Super expr)
+    {
+        if (currentClassType == ClassType.None)
+        {
+            Lox.Error(expr.Keyword, "Can't use 'super' outside of a class.");
+        }
+        else if (currentClassType != ClassType.Subclass)
+        {
+            Lox.Error(expr.Keyword, "Can't use 'super' in a class with no superclass.");
+        }
+
+        ResolveLocal(expr, expr.Keyword);
+        return null;
+    }
+
     public Void? VisitThisExpr(This expr)
     {
         if (currentClassType == ClassType.None)
@@ -115,9 +131,13 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 
     public Void? VisitVariableExpr(Variable expr)
     {
-        if (scopes.Count > 0 && scopes.Peek()[expr.Name.Lexeme] == false)
+        if (scopes.Count > 0 &&
+            scopes.Peek().TryGetValue(expr.Name.Lexeme, out var defined))
         {
-            Lox.Error(expr.Name, "Can't read local variable in its own initializer.");
+            if (defined == false)
+            {
+                Lox.Error(expr.Name, "Can't read local variable in its own initializer.");
+            }
         }
 
         ResolveLocal(expr, expr.Name);
@@ -140,13 +160,31 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         Declare(stmt.Name);
         Define(stmt.Name);
 
+        if (stmt.Superclass != null &&
+            stmt.Name.Lexeme == stmt.Superclass.Name.Lexeme)
+        {
+            Lox.Error(stmt.Superclass.Name, "A class can't inherit from itself.");
+        }
+
+        if (stmt.Superclass != null)
+        {
+            currentClassType = ClassType.Subclass;
+            Resolve(stmt.Superclass);
+        }
+
+        if (stmt.Superclass != null)
+        {
+            BeginScope();
+            scopes.Peek()["super"] = true;
+        }
+
         BeginScope();
         scopes.Peek()["this"] = true;
 
         foreach (var method in stmt.Methods)
         {
             var declaration = FunctionType.Method;
-            if (method.Name.Lexeme == "this")
+            if (method.Name.Lexeme == "init")
             {
                 declaration = FunctionType.Initializer;
             }
@@ -154,6 +192,11 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         }
 
         EndScope();
+
+        if (stmt.Superclass != null)
+        {
+            EndScope();
+        }
 
         currentClassType = enclosingClassType;
         return null;
@@ -259,7 +302,7 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
         var scope = scopes.Peek();
         if (scope.ContainsKey(name.Lexeme))
         {
-            Lox.Error(name, "Already a vairable with this name in this scope.");
+            Lox.Error(name, "Already a variable with this name in this scope.");
         }
 
         scope[name.Lexeme] = false;
@@ -276,13 +319,16 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 
     private void ResolveLocal(Expr expr, Token name)
     {
-        for (var i = scopes.Count - 1; i >= 0; i--)
+        var distance = 0;
+        foreach (var scope in scopes)
         {
-            if (scopes.ElementAt(i).ContainsKey(name.Lexeme))
+            if (scope.ContainsKey(name.Lexeme))
             {
-                interpreter.Resolve(expr, scopes.Count - 1 - i);
+                interpreter.Resolve(expr, distance);
                 return;
             }
+
+            distance++;
         }
     }
 
