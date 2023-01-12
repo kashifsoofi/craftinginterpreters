@@ -30,7 +30,8 @@ func main() {
 func runFile(path string) {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-
+		fmt.Println("File not found.")
+		return
 	}
 
 	run(string(bytes))
