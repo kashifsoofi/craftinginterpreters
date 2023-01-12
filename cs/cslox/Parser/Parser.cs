@@ -334,6 +334,8 @@ class Parser
                 var get = (Get)expr;
                 return new Set(get.Object, get.Name, value);
             }
+
+            Error(equals, "Invalid assignment target.");
         }
 
         return expr;
