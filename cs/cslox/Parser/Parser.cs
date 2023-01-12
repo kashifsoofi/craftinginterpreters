@@ -576,9 +576,9 @@ class Parser
                 case TokenType.RETURN:
                     return;
             }
-        }
 
-        Advance();
+            Advance();
+        }
     }
 }
 

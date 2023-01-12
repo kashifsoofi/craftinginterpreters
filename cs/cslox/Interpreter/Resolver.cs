@@ -131,9 +131,13 @@ class Resolver : IExprVisitor<Void?>, IStmtVisitor<Void?>
 
     public Void? VisitVariableExpr(Variable expr)
     {
-        if (scopes.Count > 0 && scopes.Peek()[expr.Name.Lexeme] == false)
+        if (scopes.Count > 0 &&
+            scopes.Peek().TryGetValue(expr.Name.Lexeme, out var defined))
         {
-            Lox.Error(expr.Name, "Can't read local variable in its own initializer.");
+            if (defined == false)
+            {
+                Lox.Error(expr.Name, "Can't read local variable in its own initializer.");
+            }
         }
 
         ResolveLocal(expr, expr.Name);

@@ -85,7 +85,7 @@ class Lox
 
     static void Report(int line, string where, string message)
     {
-        Console.WriteLine($"[line {line}] Error{where}: {message}");
+        Console.Error.WriteLine($"[line {line}] Error{where}: {message}");
         hadError = true;
     }
 
@@ -97,13 +97,13 @@ class Lox
         }
         else
         {
-            Report(token.Line, $" at `{token.Lexeme}`", message);
+            Report(token.Line, $" at '{token.Lexeme}'", message);
         }
     }
 
     public static void RuntimeError(RuntimeError error)
     {
-        Console.WriteLine($"{error.Message}\n[line {error.Token.Line}]");
+        Console.Error.WriteLine($"{error.Message}\n[line {error.Token.Line}]");
         hadRuntimeError = true;
     }
 }

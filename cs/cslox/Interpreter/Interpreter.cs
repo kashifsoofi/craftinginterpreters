@@ -90,7 +90,7 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
                 {
                     return (string)left + (string)right;
                 }
-                throw new RuntimeError(expr.Operator, "Operands must be two numbers or two strings");
+                throw new RuntimeError(expr.Operator, "Operands must be two numbers or two strings.");
             case TokenType.SLASH:
                 CheckNumberOperands(expr.Operator, left, right);
                 if ((double)right! == 0)
@@ -434,6 +434,11 @@ class Interpreter : IExprVisitor<object?>, IStmtVisitor<Void?>
                 text = text.Substring(0, text.Length - 2);
             }
             return text;
+        }
+
+        if (value is bool)
+        {
+            return ((bool)value).ToString().ToLower();
         }
 
         return value.ToString()!;
