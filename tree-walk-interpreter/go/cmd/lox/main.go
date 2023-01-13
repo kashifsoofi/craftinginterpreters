@@ -6,10 +6,9 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-)
 
-var (
-	hadError bool
+	loxError "github.com/kashifsoofi/go-lox/internal/error"
+	"github.com/kashifsoofi/go-lox/internal/scanner"
 )
 
 func main() {
@@ -23,7 +22,6 @@ func main() {
 	} else {
 		runPrompt()
 	}
-
 }
 
 func runFile(path string) {
@@ -35,7 +33,7 @@ func runFile(path string) {
 
 	run(string(bytes))
 
-	if hadError {
+	if loxError.HadError {
 		os.Exit(65)
 	}
 }
@@ -62,19 +60,16 @@ func runPrompt() {
 		}
 
 		run(string(line))
-		hadError = false
+		loxError.HadError = false
 	}
 }
 
 func run(source string) {
-	fmt.Print(source)
-}
+	tokens := scanner.ScanTokens(source)
 
-func Error(line int, message string) {
-	report(line, "", message)
-}
+	fmt.Printf("length: %d\n", len(tokens))
 
-func report(line int, where, message string) {
-	fmt.Fprintf(os.Stderr, "[line %d] Error %s: %s\n", line, where, message)
-	hadError = true
+	for _, token := range tokens {
+		fmt.Printf("%v\n", token)
+	}
 }

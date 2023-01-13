@@ -91,6 +91,7 @@ var tokenTypeNames = map[TokenType]string{
 	True:         "TRUE",
 	Var:          "VAR",
 	While:        "WHILE",
+	EOF:          "EOF",
 }
 
 func (t TokenType) String() string {
