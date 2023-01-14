@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	loxError "github.com/kashifsoofi/go-lox/internal/error"
+	"github.com/kashifsoofi/go-lox/internal/parser"
 	"github.com/kashifsoofi/go-lox/internal/scanner"
 )
 
@@ -25,7 +25,7 @@ func main() {
 }
 
 func runFile(path string) {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Println("File not found.")
 		return
@@ -66,10 +66,13 @@ func runPrompt() {
 
 func run(source string) {
 	tokens := scanner.ScanTokens(source)
+	expression := parser.Parse(tokens)
 
-	fmt.Printf("length: %d\n", len(tokens))
-
-	for _, token := range tokens {
-		fmt.Printf("%v\n", token)
+	// Stop if there was a syntax error.
+	if loxError.HadError {
+		return
 	}
+
+	astPrinter := parser.AstPrinter{}
+	fmt.Println(astPrinter.Print(expression))
 }

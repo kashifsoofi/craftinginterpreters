@@ -10,7 +10,11 @@ var (
 )
 
 func Error(line int, message string) {
-	report(line, "", message)
+	ErrorWithWhere(line, "", message)
+}
+
+func ErrorWithWhere(line int, where, message string) {
+	report(line, where, message)
 }
 
 func report(line int, where, message string) {
