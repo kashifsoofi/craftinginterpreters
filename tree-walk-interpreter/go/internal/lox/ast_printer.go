@@ -1,10 +1,8 @@
-package parser
+package lox
 
 import (
 	"fmt"
 	"strings"
-
-	"github.com/kashifsoofi/go-lox/internal/scanner"
 )
 
 type AstPrinter struct{}
@@ -97,7 +95,7 @@ func (p *AstPrinter) transform(builder strings.Builder, parts ...interface{}) {
 			builder.WriteString(v)
 		} else if _, ok := part.(Stmt); ok {
 			// TODO
-		} else if token, ok := part.(*scanner.Token); ok {
+		} else if token, ok := part.(*Token); ok {
 			builder.WriteString(token.Lexeme)
 		} else {
 			v, _ := part.(string)

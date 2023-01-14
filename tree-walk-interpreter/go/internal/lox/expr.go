@@ -1,8 +1,4 @@
-package parser
-
-import (
-	"github.com/kashifsoofi/go-lox/internal/scanner"
-)
+package lox
 
 type ExprVisitor interface {
 	VisitAssignExpr(expr *Assign) interface{}
@@ -24,11 +20,11 @@ type Expr interface {
 }
 
 type Assign struct {
-	Name  *scanner.Token
+	Name  *Token
 	Value Expr
 }
 
-func NewAssign(name *scanner.Token, value Expr) *Assign {
+func NewAssign(name *Token, value Expr) *Assign {
 	return &Assign{
 		Name:  name,
 		Value: value,
@@ -41,11 +37,11 @@ func (expr *Assign) Accept(v ExprVisitor) interface{} {
 
 type Binary struct {
 	Left     Expr
-	Operator *scanner.Token
+	Operator *Token
 	Right    Expr
 }
 
-func NewBinary(left Expr, operator *scanner.Token, right Expr) *Binary {
+func NewBinary(left Expr, operator *Token, right Expr) *Binary {
 	return &Binary{
 		Left:     left,
 		Operator: operator,
@@ -59,11 +55,11 @@ func (expr *Binary) Accept(v ExprVisitor) interface{} {
 
 type Call struct {
 	Callee    Expr
-	Paren     *scanner.Token
+	Paren     *Token
 	Arguments []Expr
 }
 
-func NewCall(callee Expr, paren *scanner.Token, arguments []Expr) *Call {
+func NewCall(callee Expr, paren *Token, arguments []Expr) *Call {
 	return &Call{
 		Callee:    callee,
 		Paren:     paren,
@@ -77,10 +73,10 @@ func (expr *Call) Accept(v ExprVisitor) interface{} {
 
 type Get struct {
 	Object Expr
-	Name   *scanner.Token
+	Name   *Token
 }
 
-func NewGet(object Expr, name *scanner.Token) *Get {
+func NewGet(object Expr, name *Token) *Get {
 	return &Get{
 		Object: object,
 		Name:   name,
@@ -121,11 +117,11 @@ func (expr *Literal) Accept(v ExprVisitor) interface{} {
 
 type Logical struct {
 	Left     Expr
-	Operator *scanner.Token
+	Operator *Token
 	Right    Expr
 }
 
-func NewLogical(left Expr, operator *scanner.Token, right Expr) *Logical {
+func NewLogical(left Expr, operator *Token, right Expr) *Logical {
 	return &Logical{
 		Left:     left,
 		Operator: operator,
@@ -139,11 +135,11 @@ func (expr *Logical) Accept(v ExprVisitor) interface{} {
 
 type Set struct {
 	Object Expr
-	Name   *scanner.Token
+	Name   *Token
 	Value  Expr
 }
 
-func NewSet(object Expr, name *scanner.Token, value Expr) *Set {
+func NewSet(object Expr, name *Token, value Expr) *Set {
 	return &Set{
 		Object: object,
 		Name:   name,
@@ -156,11 +152,11 @@ func (expr *Set) Accept(v ExprVisitor) interface{} {
 }
 
 type Super struct {
-	Keyword *scanner.Token
-	Method  *scanner.Token
+	Keyword *Token
+	Method  *Token
 }
 
-func NewSuper(keyword *scanner.Token, method *scanner.Token) *Super {
+func NewSuper(keyword *Token, method *Token) *Super {
 	return &Super{
 		Keyword: keyword,
 		Method:  method,
@@ -172,10 +168,10 @@ func (expr *Super) Accept(v ExprVisitor) interface{} {
 }
 
 type This struct {
-	Keyword *scanner.Token
+	Keyword *Token
 }
 
-func NewThis(keyword *scanner.Token) *This {
+func NewThis(keyword *Token) *This {
 	return &This{
 		Keyword: keyword,
 	}
@@ -186,11 +182,11 @@ func (expr *This) Accept(v ExprVisitor) interface{} {
 }
 
 type Unary struct {
-	Operator *scanner.Token
+	Operator *Token
 	Right    Expr
 }
 
-func NewUnary(operator *scanner.Token, right Expr) *Unary {
+func NewUnary(operator *Token, right Expr) *Unary {
 	return &Unary{
 		Operator: operator,
 		Right:    right,
@@ -202,10 +198,10 @@ func (expr *Unary) Accept(v ExprVisitor) interface{} {
 }
 
 type Variable struct {
-	Name *scanner.Token
+	Name *Token
 }
 
-func NewVariable(name *scanner.Token) *Variable {
+func NewVariable(name *Token) *Variable {
 	return &Variable{
 		Name: name,
 	}

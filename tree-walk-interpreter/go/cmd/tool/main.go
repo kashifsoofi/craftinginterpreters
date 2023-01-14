@@ -29,18 +29,18 @@ func main() {
 		"Variable",
 	}
 	exprTypes := map[string][]string{
-		"Assign":   {"Name *scanner.Token", "Value Expr"},
-		"Binary":   {"Left Expr", "Operator *scanner.Token", "Right Expr"},
-		"Call":     {"Callee Expr", "Paren *scanner.Token", "Arguments []Expr"},
-		"Get":      {"Object Expr", "Name *scanner.Token"},
+		"Assign":   {"Name *Token", "Value Expr"},
+		"Binary":   {"Left Expr", "Operator *Token", "Right Expr"},
+		"Call":     {"Callee Expr", "Paren *Token", "Arguments []Expr"},
+		"Get":      {"Object Expr", "Name *Token"},
 		"Grouping": {"Expression Expr"},
 		"Literal":  {"Value interface{}"},
-		"Logical":  {"Left Expr", "Operator *scanner.Token", "Right Expr"},
-		"Set":      {"Object Expr", "Name *scanner.Token", "Value Expr"},
-		"Super":    {"Keyword *scanner.Token", "Method *scanner.Token"},
-		"This":     {"Keyword *scanner.Token"},
-		"Unary":    {"Operator *scanner.Token", "Right Expr"},
-		"Variable": {"Name *scanner.Token"},
+		"Logical":  {"Left Expr", "Operator *Token", "Right Expr"},
+		"Set":      {"Object Expr", "Name *Token", "Value Expr"},
+		"Super":    {"Keyword *Token", "Method *Token"},
+		"This":     {"Keyword *Token"},
+		"Unary":    {"Operator *Token", "Right Expr"},
+		"Variable": {"Name *Token"},
 	}
 	generateAst(outputDir, "Expr", exprTypeNames, exprTypes)
 
@@ -57,13 +57,13 @@ func main() {
 	}
 	stmtTypes := map[string][]string{
 		"Block":      {"Statements []Stmt"},
-		"Class":      {"Name *scanner.Token", "Superclass *Variable", "Methods []*Function"},
+		"Class":      {"Name *Token", "Superclass *Variable", "Methods []*Function"},
 		"Expression": {"Expression Expr"},
-		"Function":   {"Name *scanner.Token", "Parameters []*scanner.Token", "Body []Stmt"},
+		"Function":   {"Name *Token", "Parameters []*Token", "Body []Stmt"},
 		"If":         {"Condition Expr", "ThenBranch Stmt", "ElseBranch Stmt"},
 		"Print":      {"Expression Expr"},
-		"Return":     {"Keyword *scanner.Token", "Value Expr"},
-		"Var":        {"Name *scanner.Token", "Initializer Expr"},
+		"Return":     {"Keyword *Token", "Value Expr"},
+		"Var":        {"Name *Token", "Initializer Expr"},
 		"While":      {"Condition Expr", "Body Stmt"},
 	}
 	generateAst(outputDir, "Stmt", stmtTypeNames, stmtTypes)
@@ -78,11 +78,7 @@ func generateAst(outputDir, baseName string, typeNames []string, types map[strin
 	}
 	defer f.Close()
 
-	fmt.Fprintln(f, "package parser")
-	fmt.Fprintln(f, "")
-	fmt.Fprintln(f, "import (")
-	fmt.Fprintln(f, "\t\"github.com/kashifsoofi/go-lox/internal/scanner\"")
-	fmt.Fprintln(f, ")")
+	fmt.Fprintln(f, "package lox")
 	fmt.Fprintln(f, "")
 
 	generateVisitor(f, baseName, typeNames)

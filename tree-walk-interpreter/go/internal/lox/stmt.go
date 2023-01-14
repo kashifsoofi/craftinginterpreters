@@ -1,8 +1,4 @@
-package parser
-
-import (
-	"github.com/kashifsoofi/go-lox/internal/scanner"
-)
+package lox
 
 type StmtVisitor interface {
 	VisitBlockStmt(expr *Block) interface{}
@@ -35,12 +31,12 @@ func (stmt *Block) Accept(v StmtVisitor) interface{} {
 }
 
 type Class struct {
-	Name       *scanner.Token
+	Name       *Token
 	Superclass *Variable
 	Methods    []*Function
 }
 
-func NewClass(name *scanner.Token, superclass *Variable, methods []*Function) *Class {
+func NewClass(name *Token, superclass *Variable, methods []*Function) *Class {
 	return &Class{
 		Name:       name,
 		Superclass: superclass,
@@ -67,12 +63,12 @@ func (stmt *Expression) Accept(v StmtVisitor) interface{} {
 }
 
 type Function struct {
-	Name       *scanner.Token
-	Parameters []*scanner.Token
+	Name       *Token
+	Parameters []*Token
 	Body       []Stmt
 }
 
-func NewFunction(name *scanner.Token, parameters []*scanner.Token, body []Stmt) *Function {
+func NewFunction(name *Token, parameters []*Token, body []Stmt) *Function {
 	return &Function{
 		Name:       name,
 		Parameters: parameters,
@@ -117,11 +113,11 @@ func (stmt *Print) Accept(v StmtVisitor) interface{} {
 }
 
 type Return struct {
-	Keyword *scanner.Token
+	Keyword *Token
 	Value   Expr
 }
 
-func NewReturn(keyword *scanner.Token, value Expr) *Return {
+func NewReturn(keyword *Token, value Expr) *Return {
 	return &Return{
 		Keyword: keyword,
 		Value:   value,
@@ -133,11 +129,11 @@ func (stmt *Return) Accept(v StmtVisitor) interface{} {
 }
 
 type Var struct {
-	Name        *scanner.Token
+	Name        *Token
 	Initializer Expr
 }
 
-func NewVar(name *scanner.Token, initializer Expr) *Var {
+func NewVar(name *Token, initializer Expr) *Var {
 	return &Var{
 		Name:        name,
 		Initializer: initializer,

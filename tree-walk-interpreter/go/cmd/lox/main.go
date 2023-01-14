@@ -6,9 +6,7 @@ import (
 	"io"
 	"os"
 
-	loxError "github.com/kashifsoofi/go-lox/internal/error"
-	"github.com/kashifsoofi/go-lox/internal/parser"
-	"github.com/kashifsoofi/go-lox/internal/scanner"
+	"github.com/kashifsoofi/go-lox/internal/lox"
 )
 
 func main() {
@@ -33,7 +31,7 @@ func runFile(path string) {
 
 	run(string(bytes))
 
-	if loxError.HadError {
+	if lox.HadError {
 		os.Exit(65)
 	}
 }
@@ -60,19 +58,21 @@ func runPrompt() {
 		}
 
 		run(string(line))
-		loxError.HadError = false
+		lox.HadError = false
 	}
 }
 
 func run(source string) {
-	tokens := scanner.ScanTokens(source)
-	expression := parser.Parse(tokens)
+	scanner := lox.NewScanner(source)
+	tokens := scanner.ScanTokens()
+	parser := lox.NewParser(tokens)
+	expression := parser.Parse()
 
 	// Stop if there was a syntax error.
-	if loxError.HadError {
+	if lox.HadError {
 		return
 	}
 
-	astPrinter := parser.AstPrinter{}
+	astPrinter := lox.AstPrinter{}
 	fmt.Println(astPrinter.Print(expression))
 }
