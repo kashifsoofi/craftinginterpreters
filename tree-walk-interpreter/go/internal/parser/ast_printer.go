@@ -9,6 +9,10 @@ import (
 
 type AstPrinter struct{}
 
+func (p *AstPrinter) Print(expression Expr) string {
+	return expression.Accept(p).(string)
+}
+
 func (p *AstPrinter) VisitAssignExpr(expr *Assign) interface{} {
 	return p.parenthesize2("=", expr.Name.Lexeme, expr.Value)
 }
@@ -64,6 +68,7 @@ func (p *AstPrinter) VisitVariableExpr(expr *Variable) interface{} {
 func (p *AstPrinter) parenthesize(name string, exprs ...Expr) string {
 	var builder strings.Builder
 	builder.WriteString("(")
+	builder.WriteString(name)
 	for _, expr := range exprs {
 		builder.WriteString(" ")
 		v, _ := expr.Accept(p).(string)
