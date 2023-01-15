@@ -18,16 +18,16 @@ func errorWithToken(token *Token, message string) {
 	if token.Type == TokenTypeEOF {
 		report(token.Line, "at end", message)
 	} else {
-		report(token.Line, "at '"+token.Lexeme+"'", message)
+		report(token.Line, " at '"+token.Lexeme+"'", message)
 	}
 }
 
 func reportRuntimeError(err runtimeError) {
-	fmt.Fprintf(os.Stderr, "%v", err)
+	fmt.Fprintf(os.Stderr, "%v", err.Error())
 	HadRuntimeError = true
 }
 
 func report(line int, where, message string) {
-	fmt.Fprintf(os.Stderr, "[line %d] Error %s: %s\n", line, where, message)
+	fmt.Fprintf(os.Stderr, "[line %d] Error%s: %s\n", line, where, message)
 	HadError = true
 }

@@ -5,13 +5,17 @@ import (
 	"strings"
 )
 
-type Interpreter struct{}
-
-func NewInterpreter() *Interpreter {
-	return &Interpreter{}
+type Interpreter struct {
+	environment *environment
 }
 
-func (i *Interpreter) Interpret(expr Expr) {
+func NewInterpreter() *Interpreter {
+	return &Interpreter{
+		environment: newEnvironment(nil),
+	}
+}
+
+func (i *Interpreter) Interpret(statements []Stmt) {
 	defer func() {
 		if err := recover(); err != nil {
 			if runtimeErr, ok := err.(runtimeError); ok {
@@ -22,12 +26,15 @@ func (i *Interpreter) Interpret(expr Expr) {
 		}
 	}()
 
-	value := i.evaluate(expr)
-	fmt.Println(stringify(value))
+	for _, statement := range statements {
+		i.execute(statement)
+	}
 }
 
 func (i *Interpreter) VisitAssignExpr(expr *Assign) interface{} {
-	return nil
+	value := i.evaluate(expr.Value)
+	i.environment.assign(expr.Name, value)
+	return value
 }
 
 func (i *Interpreter) VisitBinaryExpr(expr *Binary) interface{} {
@@ -130,6 +137,7 @@ func (i *Interpreter) VisitUnaryExpr(expr *Unary) interface{} {
 	case TokenTypeBang:
 		return !i.isTruthy(right)
 	case TokenTypeMinus:
+		checkNumberOperand(expr.Operator, right)
 		f, _ := right.(float64)
 		return -f
 	}
@@ -139,11 +147,74 @@ func (i *Interpreter) VisitUnaryExpr(expr *Unary) interface{} {
 }
 
 func (i *Interpreter) VisitVariableExpr(expr *Variable) interface{} {
+	return i.environment.get(expr.Name)
+}
+
+func (i *Interpreter) VisitBlockStmt(stmt *Block) interface{} {
+	i.executeBlock(stmt.Statements, newEnvironment(i.environment))
+	return nil
+}
+
+func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
+	return nil
+}
+
+func (i *Interpreter) VisitExpressionStmt(stmt *Expression) interface{} {
+	return i.evaluate(stmt.Expression)
+}
+
+func (i *Interpreter) VisitFunctionStmt(stmt *Function) interface{} {
+	return nil
+}
+
+func (i *Interpreter) VisitIfStmt(stmt *If) interface{} {
+	return nil
+}
+
+func (i *Interpreter) VisitPrintStmt(stmt *Print) interface{} {
+	value := i.evaluate(stmt.Expression)
+	fmt.Println(stringify(value))
+	return nil
+}
+
+func (i *Interpreter) VisitReturnStmt(stmt *Return) interface{} {
+	return nil
+}
+
+func (i *Interpreter) VisitVarStmt(stmt *Var) interface{} {
+	var value interface{} = nil
+	if stmt.Initializer != nil {
+		value = i.evaluate(stmt.Initializer)
+	}
+
+	i.environment.define(stmt.Name.Lexeme, value)
+	return nil
+}
+
+func (i *Interpreter) VisitWhileStmt(stmt *While) interface{} {
 	return nil
 }
 
 func (i *Interpreter) evaluate(expr Expr) interface{} {
 	return expr.Accept(i)
+}
+
+func (i *Interpreter) execute(stmt Stmt) {
+	stmt.Accept(i)
+}
+
+func (i *Interpreter) executeBlock(statements []Stmt, environment *environment) {
+	previousEnvironment := i.environment
+
+	defer func() {
+		i.environment = previousEnvironment
+	}()
+
+	i.environment = environment
+
+	for _, statement := range statements {
+		i.execute(statement)
+	}
 }
 
 func (i *Interpreter) isTruthy(object interface{}) bool {
@@ -167,6 +238,13 @@ func (i *Interpreter) isEqual(a, b interface{}) bool {
 	}
 
 	return a == b
+}
+
+func checkNumberOperand(token *Token, operand interface{}) {
+	if _, ok := operand.(float64); ok {
+		return
+	}
+	panic(newRuntimeError(token, "Operand must be a number."))
 }
 
 func checkNumberOperands(token *Token, left, right interface{}) {

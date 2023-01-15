@@ -74,12 +74,12 @@ func run(source string) {
 	scanner := lox.NewScanner(source)
 	tokens := scanner.ScanTokens()
 	parser := lox.NewParser(tokens)
-	expression := parser.Parse()
+	statements := parser.Parse()
 
 	// Stop if there was a syntax error.
 	if lox.HadError {
 		return
 	}
 
-	interpreter.Interpret(expression)
+	interpreter.Interpret(statements)
 }
