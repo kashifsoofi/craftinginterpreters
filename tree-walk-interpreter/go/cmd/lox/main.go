@@ -9,6 +9,10 @@ import (
 	"github.com/kashifsoofi/go-lox/internal/lox"
 )
 
+var (
+	interpreter *lox.Interpreter = lox.NewInterpreter()
+)
+
 func main() {
 	if len(os.Args) > 2 {
 		fmt.Println("Usage: go-lox [script]")
@@ -33,6 +37,9 @@ func runFile(path string) {
 
 	if lox.HadError {
 		os.Exit(65)
+	}
+	if lox.HadRuntimeError {
+		os.Exit(70)
 	}
 }
 
@@ -59,6 +66,7 @@ func runPrompt() {
 
 		run(string(line))
 		lox.HadError = false
+		lox.HadRuntimeError = false
 	}
 }
 
@@ -73,6 +81,5 @@ func run(source string) {
 		return
 	}
 
-	astPrinter := lox.AstPrinter{}
-	fmt.Println(astPrinter.Print(expression))
+	interpreter.Interpret(expression)
 }
