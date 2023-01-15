@@ -96,7 +96,7 @@ func generateAst(outputDir, baseName string, typeNames []string, types map[strin
 func generateVisitor(f *os.File, baseName string, typeNames []string) {
 	fmt.Fprintf(f, "type %sVisitor interface {\n", baseName)
 	for _, typeName := range typeNames {
-		fmt.Fprintf(f, "\tVisit%s%s(expr *%s) interface{}\n", typeName, baseName, typeName)
+		fmt.Fprintf(f, "\tVisit%s%s(%s *%s) interface{}\n", typeName, baseName, strings.ToLower(baseName), typeName)
 	}
 	fmt.Fprintf(f, "}\n")
 	fmt.Fprintln(f, "")

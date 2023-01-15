@@ -1,15 +1,15 @@
 package lox
 
 type StmtVisitor interface {
-	VisitBlockStmt(expr *Block) interface{}
-	VisitClassStmt(expr *Class) interface{}
-	VisitExpressionStmt(expr *Expression) interface{}
-	VisitFunctionStmt(expr *Function) interface{}
-	VisitIfStmt(expr *If) interface{}
-	VisitPrintStmt(expr *Print) interface{}
-	VisitReturnStmt(expr *Return) interface{}
-	VisitVarStmt(expr *Var) interface{}
-	VisitWhileStmt(expr *While) interface{}
+	VisitBlockStmt(stmt *Block) interface{}
+	VisitClassStmt(stmt *Class) interface{}
+	VisitExpressionStmt(stmt *Expression) interface{}
+	VisitFunctionStmt(stmt *Function) interface{}
+	VisitIfStmt(stmt *If) interface{}
+	VisitPrintStmt(stmt *Print) interface{}
+	VisitReturnStmt(stmt *Return) interface{}
+	VisitVarStmt(stmt *Var) interface{}
+	VisitWhileStmt(stmt *While) interface{}
 }
 
 type Stmt interface {
