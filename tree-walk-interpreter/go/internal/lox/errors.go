@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	HadError bool
+	HadError        bool = false
+	HadRuntimeError bool = false
 )
 
 func error(line int, message string) {
@@ -19,6 +20,11 @@ func errorWithToken(token *Token, message string) {
 	} else {
 		report(token.Line, "at '"+token.Lexeme+"'", message)
 	}
+}
+
+func reportRuntimeError(err runtimeError) {
+	fmt.Fprintf(os.Stderr, "%v", err)
+	HadRuntimeError = true
 }
 
 func report(line int, where, message string) {
