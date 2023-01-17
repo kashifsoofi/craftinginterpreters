@@ -209,7 +209,7 @@ func (i *Interpreter) VisitVarStmt(stmt *Var) interface{} {
 }
 
 func (i *Interpreter) VisitWhileStmt(stmt *While) interface{} {
-	for i.isTruthy(stmt.Condition) {
+	for i.isTruthy(i.evaluate(stmt.Condition)) {
 		i.execute(stmt.Body)
 	}
 	return nil
