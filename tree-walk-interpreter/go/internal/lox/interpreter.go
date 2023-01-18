@@ -8,6 +8,7 @@ import (
 type Interpreter struct {
 	globals     *environment
 	environment *environment
+	locals      map[Expr]int
 }
 
 func NewInterpreter() *Interpreter {
@@ -16,6 +17,7 @@ func NewInterpreter() *Interpreter {
 	return &Interpreter{
 		globals:     g,
 		environment: g,
+		locals:      make(map[Expr]int, 0),
 	}
 }
 
@@ -37,7 +39,13 @@ func (i *Interpreter) Interpret(statements []Stmt) {
 
 func (i *Interpreter) VisitAssignExpr(expr *Assign) interface{} {
 	value := i.evaluate(expr.Value)
-	i.environment.assign(expr.Name, value)
+
+	distance, ok := i.locals[expr]
+	if ok {
+		i.environment.assignAt(distance, expr.Name, value)
+	} else {
+		i.globals.assign(expr.Name, value)
+	}
 	return value
 }
 
@@ -179,7 +187,7 @@ func (i *Interpreter) VisitUnaryExpr(expr *Unary) interface{} {
 }
 
 func (i *Interpreter) VisitVariableExpr(expr *Variable) interface{} {
-	return i.environment.get(expr.Name)
+	return i.lookupVariable(expr.Name, expr)
 }
 
 func (i *Interpreter) VisitBlockStmt(stmt *Block) interface{} {
@@ -285,6 +293,19 @@ func (i *Interpreter) isEqual(a, b interface{}) bool {
 	}
 
 	return a == b
+}
+
+func (i *Interpreter) resolve(expr Expr, depth int) {
+	i.locals[expr] = depth
+}
+
+func (i *Interpreter) lookupVariable(name *Token, expr Expr) interface{} {
+	distance, ok := i.locals[expr]
+	if ok {
+		return i.environment.getAt(distance, name.Lexeme)
+	} else {
+		return i.globals.get(name)
+	}
 }
 
 func checkNumberOperand(token *Token, operand interface{}) {
