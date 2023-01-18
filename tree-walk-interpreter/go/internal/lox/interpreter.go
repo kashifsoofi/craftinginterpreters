@@ -6,12 +6,16 @@ import (
 )
 
 type Interpreter struct {
+	globals     *environment
 	environment *environment
 }
 
 func NewInterpreter() *Interpreter {
+	g := newEnvironment(nil)
+	g.define("clock", newClockNativeFunction())
 	return &Interpreter{
-		environment: newEnvironment(nil),
+		globals:     g,
+		environment: g,
 	}
 }
 
@@ -100,7 +104,23 @@ func (i *Interpreter) VisitBinaryExpr(expr *Binary) interface{} {
 }
 
 func (i *Interpreter) VisitCallExpr(expr *Call) interface{} {
-	return nil
+	callee := i.evaluate(expr.Callee)
+
+	arguments := make([]interface{}, 0)
+	for _, argument := range expr.Arguments {
+		arguments = append(arguments, i.evaluate(argument))
+	}
+
+	function, ok := callee.(LoxCallable)
+	if !ok {
+		panic(newRuntimeError(expr.Paren, "Can only call functions and classes."))
+	}
+
+	if len(arguments) != function.arity() {
+		panic(newRuntimeError(expr.Paren, fmt.Sprintf("Expected %d arguments but got %d.", function.arity(), len(arguments))))
+	}
+
+	return function.call(i, arguments)
 }
 
 func (i *Interpreter) VisitGetExpr(expr *Get) interface{} {
@@ -176,6 +196,8 @@ func (i *Interpreter) VisitExpressionStmt(stmt *Expression) interface{} {
 }
 
 func (i *Interpreter) VisitFunctionStmt(stmt *Function) interface{} {
+	function := newLoxFunction(stmt, i.environment)
+	i.environment.define(stmt.Name.Lexeme, function)
 	return nil
 }
 
@@ -195,7 +217,12 @@ func (i *Interpreter) VisitPrintStmt(stmt *Print) interface{} {
 }
 
 func (i *Interpreter) VisitReturnStmt(stmt *Return) interface{} {
-	return nil
+	var value interface{} = nil
+	if stmt.Value != nil {
+		value = i.evaluate(stmt.Value)
+	}
+
+	panic(newReturnControl(value))
 }
 
 func (i *Interpreter) VisitVarStmt(stmt *Var) interface{} {
