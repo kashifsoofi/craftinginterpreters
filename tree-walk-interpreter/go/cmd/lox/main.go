@@ -81,5 +81,12 @@ func run(source string) {
 		return
 	}
 
+	resolver := lox.NewResolver(interpreter)
+	resolver.Resolve(statements)
+
+	if lox.HadError {
+		return
+	}
+
 	interpreter.Interpret(statements)
 }

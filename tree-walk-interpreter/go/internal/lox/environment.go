@@ -43,3 +43,20 @@ func (e *environment) get(name *Token) interface{} {
 
 	panic(newRuntimeError(name, fmt.Sprintf("Undefined variable '%s'.", name.Lexeme)))
 }
+
+func (e *environment) getAt(distance int, name string) interface{} {
+	return e.ancestor(distance).values[name]
+}
+
+func (e *environment) assignAt(distance int, name *Token, value interface{}) {
+	e.ancestor(distance).values[name.Lexeme] = value
+}
+
+func (e *environment) ancestor(distance int) *environment {
+	environment := e
+	for i := 0; i < distance; i++ {
+		environment = environment.enclosing
+	}
+
+	return environment
+}
