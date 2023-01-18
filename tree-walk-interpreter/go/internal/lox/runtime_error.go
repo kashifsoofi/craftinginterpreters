@@ -14,6 +14,6 @@ func newRuntimeError(token *Token, message string) runtimeError {
 	}
 }
 
-func (e *runtimeError) Error() string {
+func (e runtimeError) Error() string {
 	return fmt.Sprintf("%s\n[line %d]", e.message, e.token.Line)
 }

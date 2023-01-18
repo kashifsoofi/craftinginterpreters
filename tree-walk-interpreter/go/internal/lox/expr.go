@@ -20,13 +20,13 @@ type Expr interface {
 }
 
 type Assign struct {
-	Name  *Token
+	Name *Token
 	Value Expr
 }
 
 func NewAssign(name *Token, value Expr) *Assign {
 	return &Assign{
-		Name:  name,
+		Name: name,
 		Value: value,
 	}
 }
@@ -36,16 +36,16 @@ func (expr *Assign) Accept(v ExprVisitor) interface{} {
 }
 
 type Binary struct {
-	Left     Expr
+	Left Expr
 	Operator *Token
-	Right    Expr
+	Right Expr
 }
 
 func NewBinary(left Expr, operator *Token, right Expr) *Binary {
 	return &Binary{
-		Left:     left,
+		Left: left,
 		Operator: operator,
-		Right:    right,
+		Right: right,
 	}
 }
 
@@ -54,15 +54,15 @@ func (expr *Binary) Accept(v ExprVisitor) interface{} {
 }
 
 type Call struct {
-	Callee    Expr
-	Paren     *Token
+	Callee Expr
+	Paren *Token
 	Arguments []Expr
 }
 
 func NewCall(callee Expr, paren *Token, arguments []Expr) *Call {
 	return &Call{
-		Callee:    callee,
-		Paren:     paren,
+		Callee: callee,
+		Paren: paren,
 		Arguments: arguments,
 	}
 }
@@ -73,13 +73,13 @@ func (expr *Call) Accept(v ExprVisitor) interface{} {
 
 type Get struct {
 	Object Expr
-	Name   *Token
+	Name *Token
 }
 
 func NewGet(object Expr, name *Token) *Get {
 	return &Get{
 		Object: object,
-		Name:   name,
+		Name: name,
 	}
 }
 
@@ -116,16 +116,16 @@ func (expr *Literal) Accept(v ExprVisitor) interface{} {
 }
 
 type Logical struct {
-	Left     Expr
+	Left Expr
 	Operator *Token
-	Right    Expr
+	Right Expr
 }
 
 func NewLogical(left Expr, operator *Token, right Expr) *Logical {
 	return &Logical{
-		Left:     left,
+		Left: left,
 		Operator: operator,
-		Right:    right,
+		Right: right,
 	}
 }
 
@@ -135,15 +135,15 @@ func (expr *Logical) Accept(v ExprVisitor) interface{} {
 
 type Set struct {
 	Object Expr
-	Name   *Token
-	Value  Expr
+	Name *Token
+	Value Expr
 }
 
 func NewSet(object Expr, name *Token, value Expr) *Set {
 	return &Set{
 		Object: object,
-		Name:   name,
-		Value:  value,
+		Name: name,
+		Value: value,
 	}
 }
 
@@ -153,13 +153,13 @@ func (expr *Set) Accept(v ExprVisitor) interface{} {
 
 type Super struct {
 	Keyword *Token
-	Method  *Token
+	Method *Token
 }
 
 func NewSuper(keyword *Token, method *Token) *Super {
 	return &Super{
 		Keyword: keyword,
-		Method:  method,
+		Method: method,
 	}
 }
 
@@ -183,13 +183,13 @@ func (expr *This) Accept(v ExprVisitor) interface{} {
 
 type Unary struct {
 	Operator *Token
-	Right    Expr
+	Right Expr
 }
 
 func NewUnary(operator *Token, right Expr) *Unary {
 	return &Unary{
 		Operator: operator,
-		Right:    right,
+		Right: right,
 	}
 }
 
@@ -210,3 +210,4 @@ func NewVariable(name *Token) *Variable {
 func (expr *Variable) Accept(v ExprVisitor) interface{} {
 	return v.VisitVariableExpr(expr)
 }
+

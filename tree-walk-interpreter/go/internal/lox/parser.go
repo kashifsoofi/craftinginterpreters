@@ -1,5 +1,7 @@
 package lox
 
+import "fmt"
+
 type Parser struct {
 	tokens  []*Token
 	current int
@@ -31,11 +33,37 @@ func (p *Parser) declaration() Stmt {
 		}
 	}()
 
+	if p.match(TokenTypeFun) {
+		return p.function("function")
+	}
 	if p.match(TokenTypeVar) {
 		return p.varDeclaration()
 	}
 
 	return p.statement()
+}
+
+func (p *Parser) function(kind string) Stmt {
+	name := p.consume(TokenTypeIdentifier, fmt.Sprintf("Expect %s name.", kind))
+	p.consume(TokenTypeLeftParen, fmt.Sprintf("Expect '(' after %s name.", kind))
+	parameters := make([]*Token, 0)
+	if !p.check(TokenTypeRightParen) {
+		for {
+			if len(parameters) >= 255 {
+				newParseError(p.peek(), "Can't have more than 255 parameters.")
+			}
+
+			parameters = append(parameters, p.consume(TokenTypeIdentifier, "Expect parameter name."))
+			if !p.match(TokenTypeComma) {
+				break
+			}
+		}
+	}
+	p.consume(TokenTypeRightParen, "Expect ')' after parameters.")
+
+	p.consume(TokenTypeLeftBrace, fmt.Sprintf("Expect '{' before %s body.", kind))
+	body := p.block()
+	return NewFunction(name, parameters, body)
 }
 
 func (p *Parser) varDeclaration() Stmt {
@@ -59,6 +87,9 @@ func (p *Parser) statement() Stmt {
 	}
 	if p.match(TokenTypePrint) {
 		return p.printStatement()
+	}
+	if p.match(TokenTypeReturn) {
+		return p.returnStatement()
 	}
 	if p.match(TokenTypeWhile) {
 		return p.whileStatement()
@@ -147,6 +178,17 @@ func (p *Parser) printStatement() Stmt {
 	value := p.expression()
 	p.consume(TokenTypeSemicolon, "Expect ';' after value.")
 	return NewPrint(value)
+}
+
+func (p *Parser) returnStatement() Stmt {
+	keyword := p.previous()
+	var value Expr = nil
+	if !p.check(TokenTypeSemicolon) {
+		value = p.expression()
+	}
+
+	p.consume(TokenTypeSemicolon, "Expect ';' after return value.")
+	return NewReturn(keyword, value)
 }
 
 func (p *Parser) whileStatement() Stmt {
@@ -259,7 +301,40 @@ func (p *Parser) unary() Expr {
 		return NewUnary(operator, right)
 	}
 
-	return p.primary()
+	return p.call()
+}
+
+func (p *Parser) call() Expr {
+	expr := p.primary()
+
+	for {
+		if p.match(TokenTypeLeftParen) {
+			expr = p.finishCall(expr)
+		} else {
+			break
+		}
+	}
+
+	return expr
+}
+
+func (p *Parser) finishCall(callee Expr) Expr {
+	arguments := make([]Expr, 0)
+	if !p.check(TokenTypeRightParen) {
+		for {
+			if len(arguments) >= 255 {
+				newParseError(p.peek(), "Can't have more than 255 arguments.")
+			}
+			arguments = append(arguments, p.expression())
+			if !p.match(TokenTypeComma) {
+				break
+			}
+		}
+	}
+
+	paren := p.consume(TokenTypeRightParen, "Expect ')' after arguments.")
+
+	return NewCall(callee, paren, arguments)
 }
 
 func (p *Parser) primary() Expr {
