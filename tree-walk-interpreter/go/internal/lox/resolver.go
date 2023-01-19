@@ -102,6 +102,8 @@ func (r *Resolver) VisitBlockStmt(stmt *Block) interface{} {
 }
 
 func (r *Resolver) VisitClassStmt(stmt *Class) interface{} {
+	r.declare(stmt.Name)
+	r.define(stmt.Name)
 	return nil
 }
 

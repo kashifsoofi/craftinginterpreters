@@ -196,6 +196,9 @@ func (i *Interpreter) VisitBlockStmt(stmt *Block) interface{} {
 }
 
 func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
+	i.environment.define(stmt.Name.Lexeme, nil)
+	class := newLoxClass(stmt.Name.Lexeme)
+	i.environment.assign(stmt.Name, class)
 	return nil
 }
 
