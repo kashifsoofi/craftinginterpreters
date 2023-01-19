@@ -133,7 +133,7 @@ func (i *Interpreter) VisitCallExpr(expr *Call) interface{} {
 
 func (i *Interpreter) VisitGetExpr(expr *Get) interface{} {
 	object := i.evaluate(expr.Object)
-	if instance, ok := object.(loxInstance); ok {
+	if instance, ok := object.(*loxInstance); ok {
 		return instance.get(expr.Name)
 	}
 
@@ -166,7 +166,7 @@ func (i *Interpreter) VisitLogicalExpr(expr *Logical) interface{} {
 
 func (i *Interpreter) VisitSetExpr(expr *Set) interface{} {
 	object := i.evaluate(expr.Object)
-	instance, ok := object.(loxInstance)
+	instance, ok := object.(*loxInstance)
 	if !ok {
 		panic(newRuntimeError(expr.Name, "Only instances have fields."))
 	}
@@ -213,7 +213,7 @@ func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
 
 	methods := map[string]*loxFunction{}
 	for _, method := range stmt.Methods {
-		function := newLoxFunction(method, i.environment)
+		function := newLoxFunction(method, i.environment, method.Name.Lexeme == "init")
 		methods[method.Name.Lexeme] = function
 	}
 
@@ -228,7 +228,7 @@ func (i *Interpreter) VisitExpressionStmt(stmt *Expression) interface{} {
 }
 
 func (i *Interpreter) VisitFunctionStmt(stmt *Function) interface{} {
-	function := newLoxFunction(stmt, i.environment)
+	function := newLoxFunction(stmt, i.environment, false)
 	i.environment.define(stmt.Name.Lexeme, function)
 	return nil
 }

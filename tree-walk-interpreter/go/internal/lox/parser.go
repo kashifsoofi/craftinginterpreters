@@ -233,7 +233,7 @@ func (p *Parser) assignment() Expr {
 			name := variable.Name
 			return NewAssign(name, value)
 		} else if get, ok := expr.(*Get); ok {
-			return NewSet(get, get.Name, value)
+			return NewSet(get.Object, get.Name, value)
 		}
 
 		newParseError(equals, "Invalid assignment target.")
@@ -375,12 +375,12 @@ func (p *Parser) primary() Expr {
 		return NewLiteral(p.previous().Literal)
 	}
 
-	if p.match(TokenTypeIdentifier) {
-		return NewVariable(p.previous())
-	}
-
 	if p.match(TokenTypeThis) {
 		return NewThis(p.previous())
+	}
+
+	if p.match(TokenTypeIdentifier) {
+		return NewVariable(p.previous())
 	}
 
 	if p.match(TokenTypeLeftParen) {

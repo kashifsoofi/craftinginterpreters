@@ -16,7 +16,7 @@ func error(line int, message string) {
 
 func errorWithToken(token *Token, message string) {
 	if token.Type == TokenTypeEOF {
-		report(token.Line, "at end", message)
+		report(token.Line, " at end", message)
 	} else {
 		report(token.Line, " at '"+token.Lexeme+"'", message)
 	}

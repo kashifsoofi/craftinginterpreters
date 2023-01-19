@@ -7,12 +7,14 @@ import (
 type loxFunction struct {
 	declaration *Function
 	closure     *environment
+	initializer bool
 }
 
-func newLoxFunction(declaration *Function, closure *environment) *loxFunction {
+func newLoxFunction(declaration *Function, closure *environment, initializer bool) *loxFunction {
 	return &loxFunction{
 		declaration: declaration,
 		closure:     closure,
+		initializer: initializer,
 	}
 }
 
@@ -24,6 +26,11 @@ func (f *loxFunction) call(interpreter *Interpreter, arguments []interface{}) (r
 	defer func() {
 		if r := recover(); r != nil {
 			if returnValue, ok := r.(returnControl); ok {
+				if f.initializer {
+					returnVal = f.closure.getAt(0, "this")
+					return
+				}
+
 				returnVal = returnValue.value
 				return
 			}
@@ -38,13 +45,16 @@ func (f *loxFunction) call(interpreter *Interpreter, arguments []interface{}) (r
 	}
 
 	interpreter.executeBlock(f.declaration.Body, environment)
+	if f.initializer {
+		returnVal = f.closure.getAt(0, "this")
+	}
 	return
 }
 
 func (f *loxFunction) bind(instance *loxInstance) *loxFunction {
 	environment := newEnvironment(f.closure)
 	environment.define("this", instance)
-	return newLoxFunction(f.declaration, environment)
+	return newLoxFunction(f.declaration, environment, f.initializer)
 }
 
 func (f *loxFunction) String() string {
