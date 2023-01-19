@@ -181,7 +181,7 @@ func (i *Interpreter) VisitSuperExpr(expr *Super) interface{} {
 }
 
 func (i *Interpreter) VisitThisExpr(expr *This) interface{} {
-	return nil
+	return i.lookupVariable(expr.Keyword, expr)
 }
 
 func (i *Interpreter) VisitUnaryExpr(expr *Unary) interface{} {
@@ -210,8 +210,16 @@ func (i *Interpreter) VisitBlockStmt(stmt *Block) interface{} {
 
 func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
 	i.environment.define(stmt.Name.Lexeme, nil)
-	class := newLoxClass(stmt.Name.Lexeme)
+
+	methods := map[string]*loxFunction{}
+	for _, method := range stmt.Methods {
+		function := newLoxFunction(method, i.environment)
+		methods[method.Name.Lexeme] = function
+	}
+
+	class := newLoxClass(stmt.Name.Lexeme, methods)
 	i.environment.assign(stmt.Name, class)
+
 	return nil
 }
 

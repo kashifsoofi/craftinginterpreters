@@ -1,6 +1,8 @@
 package lox
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type loxInstance struct {
 	class  *loxClass
@@ -17,6 +19,11 @@ func newLoxInstance(class *loxClass) *loxInstance {
 func (i *loxInstance) get(name *Token) interface{} {
 	if value, ok := i.fields[name.Lexeme]; ok {
 		return value
+	}
+
+	method := i.class.findMethod(name.Lexeme)
+	if method != nil {
+		return method.bind(i)
 	}
 
 	panic(newRuntimeError(name, fmt.Sprintf("Undefined property '%s'.", name.Lexeme)))

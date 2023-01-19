@@ -379,6 +379,10 @@ func (p *Parser) primary() Expr {
 		return NewVariable(p.previous())
 	}
 
+	if p.match(TokenTypeThis) {
+		return NewThis(p.previous())
+	}
+
 	if p.match(TokenTypeLeftParen) {
 		expr := p.expression()
 		p.consume(TokenTypeRightParen, "Expect ')' after expression.")

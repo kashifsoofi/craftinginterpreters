@@ -5,12 +5,21 @@ type functionType int
 const (
 	functionTypeNone functionType = iota
 	functionTypeFunction
+	functionTypeMethod
+)
+
+type classType int
+
+const (
+	classTypeNone classType = iota
+	classTypeClass
 )
 
 type Resolver struct {
 	interpreter         *Interpreter
 	scopes              *stack
 	currentFunctionType functionType
+	currentClassType    classType
 }
 
 func NewResolver(interpreter *Interpreter) *Resolver {
@@ -18,6 +27,7 @@ func NewResolver(interpreter *Interpreter) *Resolver {
 		interpreter:         interpreter,
 		scopes:              newStack(),
 		currentFunctionType: functionTypeNone,
+		currentClassType:    classTypeNone,
 	}
 }
 
@@ -78,6 +88,12 @@ func (r *Resolver) VisitSuperExpr(expr *Super) interface{} {
 }
 
 func (r *Resolver) VisitThisExpr(expr *This) interface{} {
+	if r.currentClassType == classTypeNone {
+		newParseError(expr.Keyword, "Can't use 'this' outside of a class.")
+		return nil
+	}
+
+	r.resolveLocal(expr, expr.Keyword)
 	return nil
 }
 
@@ -105,8 +121,22 @@ func (r *Resolver) VisitBlockStmt(stmt *Block) interface{} {
 }
 
 func (r *Resolver) VisitClassStmt(stmt *Class) interface{} {
+	enclosingClass := r.currentClassType
+	r.currentClassType = classTypeClass
+
 	r.declare(stmt.Name)
 	r.define(stmt.Name)
+
+	r.beginScope()
+	r.scopes.peek()["this"] = true
+
+	for _, method := range stmt.Methods {
+		r.resolveFunction(method, functionTypeMethod)
+	}
+
+	r.endScope()
+
+	r.currentClassType = enclosingClass
 	return nil
 }
 
