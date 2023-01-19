@@ -48,6 +48,7 @@ func (r *Resolver) VisitCallExpr(expr *Call) interface{} {
 }
 
 func (r *Resolver) VisitGetExpr(expr *Get) interface{} {
+	r.resolveExpression(expr.Object)
 	return nil
 }
 
@@ -67,6 +68,8 @@ func (r *Resolver) VisitLogicalExpr(expr *Logical) interface{} {
 }
 
 func (r *Resolver) VisitSetExpr(expr *Set) interface{} {
+	r.resolveExpression(expr.Value)
+	r.resolveExpression(expr.Object)
 	return nil
 }
 

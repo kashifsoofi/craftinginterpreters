@@ -132,7 +132,12 @@ func (i *Interpreter) VisitCallExpr(expr *Call) interface{} {
 }
 
 func (i *Interpreter) VisitGetExpr(expr *Get) interface{} {
-	return nil
+	object := i.evaluate(expr.Object)
+	if instance, ok := object.(loxInstance); ok {
+		return instance.get(expr.Name)
+	}
+
+	panic(newRuntimeError(expr.Name, "Only instances have properties."))
 }
 
 func (i *Interpreter) VisitGroupingExpr(expr *Grouping) interface{} {
@@ -160,6 +165,14 @@ func (i *Interpreter) VisitLogicalExpr(expr *Logical) interface{} {
 }
 
 func (i *Interpreter) VisitSetExpr(expr *Set) interface{} {
+	object := i.evaluate(expr.Object)
+	instance, ok := object.(loxInstance)
+	if !ok {
+		panic(newRuntimeError(expr.Name, "Only instances have fields."))
+	}
+
+	value := i.evaluate(expr.Value)
+	instance.set(expr.Name, value)
 	return nil
 }
 
