@@ -1,6 +1,8 @@
 package lox
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Parser struct {
 	tokens  []*Token
@@ -48,6 +50,13 @@ func (p *Parser) declaration() Stmt {
 
 func (p *Parser) classDeclaration() Stmt {
 	name := p.consume(TokenTypeIdentifier, "Expect class name.")
+
+	var superclass *Variable = nil
+	if p.match(TokenTypeLess) {
+		p.consume(TokenTypeIdentifier, "Expect superclass name.")
+		superclass = NewVariable(p.previous())
+	}
+
 	p.consume(TokenTypeLeftBrace, "Expect '{' before class body.")
 
 	methods := make([]*Function, 0)
@@ -58,7 +67,7 @@ func (p *Parser) classDeclaration() Stmt {
 
 	p.consume(TokenTypeRightBrace, "Expect '}' after class body.")
 
-	return NewClass(name, nil, methods)
+	return NewClass(name, superclass, methods)
 }
 
 func (p *Parser) function(kind string) Stmt {
@@ -373,6 +382,13 @@ func (p *Parser) primary() Expr {
 
 	if p.match(TokenTypeNumber, TokenTypeString) {
 		return NewLiteral(p.previous().Literal)
+	}
+
+	if p.match(TokenTypeSuper) {
+		keyword := p.previous()
+		p.consume(TokenTypeDot, "Expect '.' after 'super'.")
+		method := p.consume(TokenTypeIdentifier, "Expect superclass method name.")
+		return NewSuper(keyword, method)
 	}
 
 	if p.match(TokenTypeThis) {

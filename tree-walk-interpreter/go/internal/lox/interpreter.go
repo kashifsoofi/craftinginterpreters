@@ -177,7 +177,17 @@ func (i *Interpreter) VisitSetExpr(expr *Set) interface{} {
 }
 
 func (i *Interpreter) VisitSuperExpr(expr *Super) interface{} {
-	return nil
+	distance := i.locals[expr]
+	superclass, _ := i.environment.getAt(distance, "super").(*loxClass)
+
+	instance, _ := i.environment.getAt(distance-1, "this").(*loxInstance)
+
+	method := superclass.findMethod(expr.Method.Lexeme)
+	if method == nil {
+		panic(newRuntimeError(expr.Method, fmt.Sprintf("Undefined property '%s'.", expr.Method.Lexeme)))
+	}
+
+	return method.bind(instance)
 }
 
 func (i *Interpreter) VisitThisExpr(expr *This) interface{} {
@@ -209,7 +219,21 @@ func (i *Interpreter) VisitBlockStmt(stmt *Block) interface{} {
 }
 
 func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
+	var superclass *loxClass = nil
+	if stmt.Superclass != nil {
+		object := i.evaluate(stmt.Superclass)
+		c, ok := object.(*loxClass)
+		if !ok {
+			panic(newRuntimeError(stmt.Superclass.Name, "Superclass must be a class."))
+		}
+		superclass = c
+	}
 	i.environment.define(stmt.Name.Lexeme, nil)
+
+	if superclass != nil {
+		i.environment = newEnvironment(i.environment)
+		i.environment.define("super", superclass)
+	}
 
 	methods := map[string]*loxFunction{}
 	for _, method := range stmt.Methods {
@@ -217,7 +241,12 @@ func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
 		methods[method.Name.Lexeme] = function
 	}
 
-	class := newLoxClass(stmt.Name.Lexeme, methods)
+	class := newLoxClass(stmt.Name.Lexeme, superclass, methods)
+
+	if superclass != nil {
+		i.environment = i.environment.enclosing
+	}
+
 	i.environment.assign(stmt.Name, class)
 
 	return nil
