@@ -5,12 +5,22 @@ type functionType int
 const (
 	functionTypeNone functionType = iota
 	functionTypeFunction
+	functionTypeInitializer
+	functionTypeMethod
+)
+
+type classType int
+
+const (
+	classTypeNone classType = iota
+	classTypeClass
 )
 
 type Resolver struct {
 	interpreter         *Interpreter
 	scopes              *stack
 	currentFunctionType functionType
+	currentClassType    classType
 }
 
 func NewResolver(interpreter *Interpreter) *Resolver {
@@ -18,6 +28,7 @@ func NewResolver(interpreter *Interpreter) *Resolver {
 		interpreter:         interpreter,
 		scopes:              newStack(),
 		currentFunctionType: functionTypeNone,
+		currentClassType:    classTypeNone,
 	}
 }
 
@@ -48,6 +59,7 @@ func (r *Resolver) VisitCallExpr(expr *Call) interface{} {
 }
 
 func (r *Resolver) VisitGetExpr(expr *Get) interface{} {
+	r.resolveExpression(expr.Object)
 	return nil
 }
 
@@ -67,6 +79,8 @@ func (r *Resolver) VisitLogicalExpr(expr *Logical) interface{} {
 }
 
 func (r *Resolver) VisitSetExpr(expr *Set) interface{} {
+	r.resolveExpression(expr.Value)
+	r.resolveExpression(expr.Object)
 	return nil
 }
 
@@ -75,6 +89,12 @@ func (r *Resolver) VisitSuperExpr(expr *Super) interface{} {
 }
 
 func (r *Resolver) VisitThisExpr(expr *This) interface{} {
+	if r.currentClassType == classTypeNone {
+		newParseError(expr.Keyword, "Can't use 'this' outside of a class.")
+		return nil
+	}
+
+	r.resolveLocal(expr, expr.Keyword)
 	return nil
 }
 
@@ -102,6 +122,26 @@ func (r *Resolver) VisitBlockStmt(stmt *Block) interface{} {
 }
 
 func (r *Resolver) VisitClassStmt(stmt *Class) interface{} {
+	enclosingClass := r.currentClassType
+	r.currentClassType = classTypeClass
+
+	r.declare(stmt.Name)
+	r.define(stmt.Name)
+
+	r.beginScope()
+	r.scopes.peek()["this"] = true
+
+	for _, method := range stmt.Methods {
+		declaration := functionTypeMethod
+		if method.Name.Lexeme == "init" {
+			declaration = functionTypeInitializer
+		}
+		r.resolveFunction(method, declaration)
+	}
+
+	r.endScope()
+
+	r.currentClassType = enclosingClass
 	return nil
 }
 
@@ -138,6 +178,10 @@ func (r *Resolver) VisitReturnStmt(stmt *Return) interface{} {
 	}
 
 	if stmt.Value != nil {
+		if r.currentFunctionType == functionTypeInitializer {
+			newParseError(stmt.Keyword, "Can't return a value from an initializer.")
+		}
+
 		r.resolveExpression(stmt.Value)
 	}
 

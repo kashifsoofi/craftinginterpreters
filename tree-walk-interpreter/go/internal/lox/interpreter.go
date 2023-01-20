@@ -132,7 +132,12 @@ func (i *Interpreter) VisitCallExpr(expr *Call) interface{} {
 }
 
 func (i *Interpreter) VisitGetExpr(expr *Get) interface{} {
-	return nil
+	object := i.evaluate(expr.Object)
+	if instance, ok := object.(*loxInstance); ok {
+		return instance.get(expr.Name)
+	}
+
+	panic(newRuntimeError(expr.Name, "Only instances have properties."))
 }
 
 func (i *Interpreter) VisitGroupingExpr(expr *Grouping) interface{} {
@@ -160,7 +165,15 @@ func (i *Interpreter) VisitLogicalExpr(expr *Logical) interface{} {
 }
 
 func (i *Interpreter) VisitSetExpr(expr *Set) interface{} {
-	return nil
+	object := i.evaluate(expr.Object)
+	instance, ok := object.(*loxInstance)
+	if !ok {
+		panic(newRuntimeError(expr.Name, "Only instances have fields."))
+	}
+
+	value := i.evaluate(expr.Value)
+	instance.set(expr.Name, value)
+	return value
 }
 
 func (i *Interpreter) VisitSuperExpr(expr *Super) interface{} {
@@ -168,7 +181,7 @@ func (i *Interpreter) VisitSuperExpr(expr *Super) interface{} {
 }
 
 func (i *Interpreter) VisitThisExpr(expr *This) interface{} {
-	return nil
+	return i.lookupVariable(expr.Keyword, expr)
 }
 
 func (i *Interpreter) VisitUnaryExpr(expr *Unary) interface{} {
@@ -196,6 +209,17 @@ func (i *Interpreter) VisitBlockStmt(stmt *Block) interface{} {
 }
 
 func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
+	i.environment.define(stmt.Name.Lexeme, nil)
+
+	methods := map[string]*loxFunction{}
+	for _, method := range stmt.Methods {
+		function := newLoxFunction(method, i.environment, method.Name.Lexeme == "init")
+		methods[method.Name.Lexeme] = function
+	}
+
+	class := newLoxClass(stmt.Name.Lexeme, methods)
+	i.environment.assign(stmt.Name, class)
+
 	return nil
 }
 
@@ -204,7 +228,7 @@ func (i *Interpreter) VisitExpressionStmt(stmt *Expression) interface{} {
 }
 
 func (i *Interpreter) VisitFunctionStmt(stmt *Function) interface{} {
-	function := newLoxFunction(stmt, i.environment)
+	function := newLoxFunction(stmt, i.environment, false)
 	i.environment.define(stmt.Name.Lexeme, function)
 	return nil
 }

@@ -33,6 +33,9 @@ func (p *Parser) declaration() Stmt {
 		}
 	}()
 
+	if p.match(TokenTypeClass) {
+		return p.classDeclaration()
+	}
 	if p.match(TokenTypeFun) {
 		return p.function("function")
 	}
@@ -41,6 +44,21 @@ func (p *Parser) declaration() Stmt {
 	}
 
 	return p.statement()
+}
+
+func (p *Parser) classDeclaration() Stmt {
+	name := p.consume(TokenTypeIdentifier, "Expect class name.")
+	p.consume(TokenTypeLeftBrace, "Expect '{' before class body.")
+
+	methods := make([]*Function, 0)
+	for !p.check(TokenTypeRightBrace) && !p.isAtEnd() {
+		method := p.function("method").(*Function)
+		methods = append(methods, method)
+	}
+
+	p.consume(TokenTypeRightBrace, "Expect '}' after class body.")
+
+	return NewClass(name, nil, methods)
 }
 
 func (p *Parser) function(kind string) Stmt {
@@ -214,6 +232,8 @@ func (p *Parser) assignment() Expr {
 		if variable, ok := expr.(*Variable); ok {
 			name := variable.Name
 			return NewAssign(name, value)
+		} else if get, ok := expr.(*Get); ok {
+			return NewSet(get.Object, get.Name, value)
 		}
 
 		newParseError(equals, "Invalid assignment target.")
@@ -310,6 +330,9 @@ func (p *Parser) call() Expr {
 	for {
 		if p.match(TokenTypeLeftParen) {
 			expr = p.finishCall(expr)
+		} else if p.match(TokenTypeDot) {
+			name := p.consume(TokenTypeIdentifier, "Expect property name after '.'.")
+			expr = NewGet(expr, name)
 		} else {
 			break
 		}
@@ -350,6 +373,10 @@ func (p *Parser) primary() Expr {
 
 	if p.match(TokenTypeNumber, TokenTypeString) {
 		return NewLiteral(p.previous().Literal)
+	}
+
+	if p.match(TokenTypeThis) {
+		return NewThis(p.previous())
 	}
 
 	if p.match(TokenTypeIdentifier) {
