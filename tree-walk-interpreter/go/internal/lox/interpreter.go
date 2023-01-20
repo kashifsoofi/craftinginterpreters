@@ -173,7 +173,7 @@ func (i *Interpreter) VisitSetExpr(expr *Set) interface{} {
 
 	value := i.evaluate(expr.Value)
 	instance.set(expr.Name, value)
-	return nil
+	return value
 }
 
 func (i *Interpreter) VisitSuperExpr(expr *Super) interface{} {
