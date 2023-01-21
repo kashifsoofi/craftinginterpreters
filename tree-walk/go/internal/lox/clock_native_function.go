@@ -12,7 +12,7 @@ func (c clockNativeFunction) arity() int {
 	return 0
 }
 
-func (c clockNativeFunction) call(interpreter *Interpreter, arguments []interface{}) interface{} {
+func (c clockNativeFunction) call(interpreter *Interpreter, arguments []any) any {
 	return time.Now().UnixMilli()
 }
 

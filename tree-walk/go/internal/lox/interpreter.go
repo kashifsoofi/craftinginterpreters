@@ -37,7 +37,7 @@ func (i *Interpreter) Interpret(statements []Stmt) {
 	}
 }
 
-func (i *Interpreter) VisitAssignExpr(expr *Assign) interface{} {
+func (i *Interpreter) VisitAssignExpr(expr *Assign) any {
 	value := i.evaluate(expr.Value)
 
 	distance, ok := i.locals[expr]
@@ -49,7 +49,7 @@ func (i *Interpreter) VisitAssignExpr(expr *Assign) interface{} {
 	return value
 }
 
-func (i *Interpreter) VisitBinaryExpr(expr *Binary) interface{} {
+func (i *Interpreter) VisitBinaryExpr(expr *Binary) any {
 	left := i.evaluate(expr.Left)
 	right := i.evaluate(expr.Right)
 
@@ -111,10 +111,10 @@ func (i *Interpreter) VisitBinaryExpr(expr *Binary) interface{} {
 	return nil
 }
 
-func (i *Interpreter) VisitCallExpr(expr *Call) interface{} {
+func (i *Interpreter) VisitCallExpr(expr *Call) any {
 	callee := i.evaluate(expr.Callee)
 
-	arguments := make([]interface{}, 0)
+	arguments := make([]any, 0)
 	for _, argument := range expr.Arguments {
 		arguments = append(arguments, i.evaluate(argument))
 	}
@@ -131,7 +131,7 @@ func (i *Interpreter) VisitCallExpr(expr *Call) interface{} {
 	return function.call(i, arguments)
 }
 
-func (i *Interpreter) VisitGetExpr(expr *Get) interface{} {
+func (i *Interpreter) VisitGetExpr(expr *Get) any {
 	object := i.evaluate(expr.Object)
 	if instance, ok := object.(*loxInstance); ok {
 		return instance.get(expr.Name)
@@ -140,15 +140,15 @@ func (i *Interpreter) VisitGetExpr(expr *Get) interface{} {
 	panic(newRuntimeError(expr.Name, "Only instances have properties."))
 }
 
-func (i *Interpreter) VisitGroupingExpr(expr *Grouping) interface{} {
+func (i *Interpreter) VisitGroupingExpr(expr *Grouping) any {
 	return i.evaluate(expr.Expression)
 }
 
-func (i *Interpreter) VisitLiteralExpr(expr *Literal) interface{} {
+func (i *Interpreter) VisitLiteralExpr(expr *Literal) any {
 	return expr.Value
 }
 
-func (i *Interpreter) VisitLogicalExpr(expr *Logical) interface{} {
+func (i *Interpreter) VisitLogicalExpr(expr *Logical) any {
 	left := i.evaluate(expr.Left)
 
 	if expr.Operator.Type == TokenTypeOr {
@@ -164,7 +164,7 @@ func (i *Interpreter) VisitLogicalExpr(expr *Logical) interface{} {
 	return i.evaluate(expr.Right)
 }
 
-func (i *Interpreter) VisitSetExpr(expr *Set) interface{} {
+func (i *Interpreter) VisitSetExpr(expr *Set) any {
 	object := i.evaluate(expr.Object)
 	instance, ok := object.(*loxInstance)
 	if !ok {
@@ -176,7 +176,7 @@ func (i *Interpreter) VisitSetExpr(expr *Set) interface{} {
 	return value
 }
 
-func (i *Interpreter) VisitSuperExpr(expr *Super) interface{} {
+func (i *Interpreter) VisitSuperExpr(expr *Super) any {
 	distance := i.locals[expr]
 	superclass, _ := i.environment.getAt(distance, "super").(*loxClass)
 
@@ -190,11 +190,11 @@ func (i *Interpreter) VisitSuperExpr(expr *Super) interface{} {
 	return method.bind(instance)
 }
 
-func (i *Interpreter) VisitThisExpr(expr *This) interface{} {
+func (i *Interpreter) VisitThisExpr(expr *This) any {
 	return i.lookupVariable(expr.Keyword, expr)
 }
 
-func (i *Interpreter) VisitUnaryExpr(expr *Unary) interface{} {
+func (i *Interpreter) VisitUnaryExpr(expr *Unary) any {
 	right := i.evaluate(expr.Right)
 	switch expr.Operator.Type {
 	case TokenTypeBang:
@@ -209,16 +209,16 @@ func (i *Interpreter) VisitUnaryExpr(expr *Unary) interface{} {
 	return nil
 }
 
-func (i *Interpreter) VisitVariableExpr(expr *Variable) interface{} {
+func (i *Interpreter) VisitVariableExpr(expr *Variable) any {
 	return i.lookupVariable(expr.Name, expr)
 }
 
-func (i *Interpreter) VisitBlockStmt(stmt *Block) interface{} {
+func (i *Interpreter) VisitBlockStmt(stmt *Block) any {
 	i.executeBlock(stmt.Statements, newEnvironment(i.environment))
 	return nil
 }
 
-func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
+func (i *Interpreter) VisitClassStmt(stmt *Class) any {
 	var superclass *loxClass = nil
 	if stmt.Superclass != nil {
 		object := i.evaluate(stmt.Superclass)
@@ -252,17 +252,17 @@ func (i *Interpreter) VisitClassStmt(stmt *Class) interface{} {
 	return nil
 }
 
-func (i *Interpreter) VisitExpressionStmt(stmt *Expression) interface{} {
+func (i *Interpreter) VisitExpressionStmt(stmt *Expression) any {
 	return i.evaluate(stmt.Expression)
 }
 
-func (i *Interpreter) VisitFunctionStmt(stmt *Function) interface{} {
+func (i *Interpreter) VisitFunctionStmt(stmt *Function) any {
 	function := newLoxFunction(stmt, i.environment, false)
 	i.environment.define(stmt.Name.Lexeme, function)
 	return nil
 }
 
-func (i *Interpreter) VisitIfStmt(stmt *If) interface{} {
+func (i *Interpreter) VisitIfStmt(stmt *If) any {
 	if i.isTruthy(i.evaluate(stmt.Condition)) {
 		i.execute(stmt.ThenBranch)
 	} else if stmt.ElseBranch != nil {
@@ -271,14 +271,14 @@ func (i *Interpreter) VisitIfStmt(stmt *If) interface{} {
 	return nil
 }
 
-func (i *Interpreter) VisitPrintStmt(stmt *Print) interface{} {
+func (i *Interpreter) VisitPrintStmt(stmt *Print) any {
 	value := i.evaluate(stmt.Expression)
 	fmt.Println(stringify(value))
 	return nil
 }
 
-func (i *Interpreter) VisitReturnStmt(stmt *Return) interface{} {
-	var value interface{} = nil
+func (i *Interpreter) VisitReturnStmt(stmt *Return) any {
+	var value any = nil
 	if stmt.Value != nil {
 		value = i.evaluate(stmt.Value)
 	}
@@ -286,8 +286,8 @@ func (i *Interpreter) VisitReturnStmt(stmt *Return) interface{} {
 	panic(newReturnControl(value))
 }
 
-func (i *Interpreter) VisitVarStmt(stmt *Var) interface{} {
-	var value interface{} = nil
+func (i *Interpreter) VisitVarStmt(stmt *Var) any {
+	var value any = nil
 	if stmt.Initializer != nil {
 		value = i.evaluate(stmt.Initializer)
 	}
@@ -296,14 +296,14 @@ func (i *Interpreter) VisitVarStmt(stmt *Var) interface{} {
 	return nil
 }
 
-func (i *Interpreter) VisitWhileStmt(stmt *While) interface{} {
+func (i *Interpreter) VisitWhileStmt(stmt *While) any {
 	for i.isTruthy(i.evaluate(stmt.Condition)) {
 		i.execute(stmt.Body)
 	}
 	return nil
 }
 
-func (i *Interpreter) evaluate(expr Expr) interface{} {
+func (i *Interpreter) evaluate(expr Expr) any {
 	return expr.Accept(i)
 }
 
@@ -325,7 +325,7 @@ func (i *Interpreter) executeBlock(statements []Stmt, environment *environment) 
 	}
 }
 
-func (i *Interpreter) isTruthy(object interface{}) bool {
+func (i *Interpreter) isTruthy(object any) bool {
 	if object == nil {
 		return false
 	}
@@ -337,7 +337,7 @@ func (i *Interpreter) isTruthy(object interface{}) bool {
 	return true
 }
 
-func (i *Interpreter) isEqual(a, b interface{}) bool {
+func (i *Interpreter) isEqual(a, b any) bool {
 	if a == nil && b == nil {
 		return true
 	}
@@ -352,7 +352,7 @@ func (i *Interpreter) resolve(expr Expr, depth int) {
 	i.locals[expr] = depth
 }
 
-func (i *Interpreter) lookupVariable(name *Token, expr Expr) interface{} {
+func (i *Interpreter) lookupVariable(name *Token, expr Expr) any {
 	distance, ok := i.locals[expr]
 	if ok {
 		return i.environment.getAt(distance, name.Lexeme)
@@ -361,14 +361,14 @@ func (i *Interpreter) lookupVariable(name *Token, expr Expr) interface{} {
 	}
 }
 
-func checkNumberOperand(token *Token, operand interface{}) {
+func checkNumberOperand(token *Token, operand any) {
 	if _, ok := operand.(float64); ok {
 		return
 	}
 	panic(newRuntimeError(token, "Operand must be a number."))
 }
 
-func checkNumberOperands(token *Token, left, right interface{}) {
+func checkNumberOperands(token *Token, left, right any) {
 	_, lok := left.(float64)
 	_, rok := right.(float64)
 	if lok && rok {
@@ -378,7 +378,7 @@ func checkNumberOperands(token *Token, left, right interface{}) {
 	panic(newRuntimeError(token, "Operands must be numbers."))
 }
 
-func stringify(object interface{}) string {
+func stringify(object any) string {
 	if object == nil {
 		return "nil"
 	}

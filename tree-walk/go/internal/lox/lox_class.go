@@ -23,7 +23,7 @@ func (c *loxClass) arity() int {
 	return initializer.arity()
 }
 
-func (c *loxClass) call(interpreter *Interpreter, arguments []interface{}) (returnVal interface{}) {
+func (c *loxClass) call(interpreter *Interpreter, arguments []any) (returnVal any) {
 	instance := newLoxInstance(c)
 	initializer := c.findMethod("init")
 	if initializer != nil {

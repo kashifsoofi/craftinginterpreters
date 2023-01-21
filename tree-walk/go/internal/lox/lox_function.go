@@ -22,7 +22,7 @@ func (f *loxFunction) arity() int {
 	return len(f.declaration.Parameters)
 }
 
-func (f *loxFunction) call(interpreter *Interpreter, arguments []interface{}) (returnVal interface{}) {
+func (f *loxFunction) call(interpreter *Interpreter, arguments []any) (returnVal any) {
 	defer func() {
 		if r := recover(); r != nil {
 			if returnValue, ok := r.(returnControl); ok {

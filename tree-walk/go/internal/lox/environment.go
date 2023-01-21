@@ -4,21 +4,21 @@ import "fmt"
 
 type environment struct {
 	enclosing *environment
-	values    map[string]interface{}
+	values    map[string]any
 }
 
 func newEnvironment(enclosing *environment) *environment {
 	return &environment{
 		enclosing: enclosing,
-		values:    make(map[string]interface{}),
+		values:    make(map[string]any),
 	}
 }
 
-func (e *environment) define(name string, value interface{}) {
+func (e *environment) define(name string, value any) {
 	e.values[name] = value
 }
 
-func (e *environment) assign(name *Token, value interface{}) {
+func (e *environment) assign(name *Token, value any) {
 	if _, ok := e.values[name.Lexeme]; ok {
 		e.values[name.Lexeme] = value
 		return
@@ -32,7 +32,7 @@ func (e *environment) assign(name *Token, value interface{}) {
 	panic(newRuntimeError(name, fmt.Sprintf("Undefined variable '%s'.", name.Lexeme)))
 }
 
-func (e *environment) get(name *Token) interface{} {
+func (e *environment) get(name *Token) any {
 	if value, ok := e.values[name.Lexeme]; ok {
 		return value
 	}
@@ -44,11 +44,11 @@ func (e *environment) get(name *Token) interface{} {
 	panic(newRuntimeError(name, fmt.Sprintf("Undefined variable '%s'.", name.Lexeme)))
 }
 
-func (e *environment) getAt(distance int, name string) interface{} {
+func (e *environment) getAt(distance int, name string) any {
 	return e.ancestor(distance).values[name]
 }
 
-func (e *environment) assignAt(distance int, name *Token, value interface{}) {
+func (e *environment) assignAt(distance int, name *Token, value any) {
 	e.ancestor(distance).values[name.Lexeme] = value
 }
 

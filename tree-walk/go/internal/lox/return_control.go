@@ -1,10 +1,10 @@
 package lox
 
 type returnControl struct {
-	value interface{}
+	value any
 }
 
-func newReturnControl(value interface{}) returnControl {
+func newReturnControl(value any) returnControl {
 	return returnControl{
 		value: value,
 	}

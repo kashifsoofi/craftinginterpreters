@@ -1,89 +1,89 @@
 package lox
 
 type ExprVisitor interface {
-	VisitAssignExpr(expr *Assign) interface{}
-	VisitBinaryExpr(expr *Binary) interface{}
-	VisitCallExpr(expr *Call) interface{}
-	VisitGetExpr(expr *Get) interface{}
-	VisitGroupingExpr(expr *Grouping) interface{}
-	VisitLiteralExpr(expr *Literal) interface{}
-	VisitLogicalExpr(expr *Logical) interface{}
-	VisitSetExpr(expr *Set) interface{}
-	VisitSuperExpr(expr *Super) interface{}
-	VisitThisExpr(expr *This) interface{}
-	VisitUnaryExpr(expr *Unary) interface{}
-	VisitVariableExpr(expr *Variable) interface{}
+	VisitAssignExpr(expr *Assign) any
+	VisitBinaryExpr(expr *Binary) any
+	VisitCallExpr(expr *Call) any
+	VisitGetExpr(expr *Get) any
+	VisitGroupingExpr(expr *Grouping) any
+	VisitLiteralExpr(expr *Literal) any
+	VisitLogicalExpr(expr *Logical) any
+	VisitSetExpr(expr *Set) any
+	VisitSuperExpr(expr *Super) any
+	VisitThisExpr(expr *This) any
+	VisitUnaryExpr(expr *Unary) any
+	VisitVariableExpr(expr *Variable) any
 }
 
 type Expr interface {
-	Accept(v ExprVisitor) interface{}
+	Accept(v ExprVisitor) any
 }
 
 type Assign struct {
-	Name *Token
+	Name  *Token
 	Value Expr
 }
 
 func NewAssign(name *Token, value Expr) *Assign {
 	return &Assign{
-		Name: name,
+		Name:  name,
 		Value: value,
 	}
 }
 
-func (expr *Assign) Accept(v ExprVisitor) interface{} {
+func (expr *Assign) Accept(v ExprVisitor) any {
 	return v.VisitAssignExpr(expr)
 }
 
 type Binary struct {
-	Left Expr
+	Left     Expr
 	Operator *Token
-	Right Expr
+	Right    Expr
 }
 
 func NewBinary(left Expr, operator *Token, right Expr) *Binary {
 	return &Binary{
-		Left: left,
+		Left:     left,
 		Operator: operator,
-		Right: right,
+		Right:    right,
 	}
 }
 
-func (expr *Binary) Accept(v ExprVisitor) interface{} {
+func (expr *Binary) Accept(v ExprVisitor) any {
 	return v.VisitBinaryExpr(expr)
 }
 
 type Call struct {
-	Callee Expr
-	Paren *Token
+	Callee    Expr
+	Paren     *Token
 	Arguments []Expr
 }
 
 func NewCall(callee Expr, paren *Token, arguments []Expr) *Call {
 	return &Call{
-		Callee: callee,
-		Paren: paren,
+		Callee:    callee,
+		Paren:     paren,
 		Arguments: arguments,
 	}
 }
 
-func (expr *Call) Accept(v ExprVisitor) interface{} {
+func (expr *Call) Accept(v ExprVisitor) any {
 	return v.VisitCallExpr(expr)
 }
 
 type Get struct {
 	Object Expr
-	Name *Token
+	Name   *Token
 }
 
 func NewGet(object Expr, name *Token) *Get {
 	return &Get{
 		Object: object,
-		Name: name,
+		Name:   name,
 	}
 }
 
-func (expr *Get) Accept(v ExprVisitor) interface{} {
+func (expr *Get) Accept(v ExprVisitor) any {
 	return v.VisitGetExpr(expr)
 }
 
@@ -97,73 +97,73 @@ func NewGrouping(expression Expr) *Grouping {
 	}
 }
 
-func (expr *Grouping) Accept(v ExprVisitor) interface{} {
+func (expr *Grouping) Accept(v ExprVisitor) any {
 	return v.VisitGroupingExpr(expr)
 }
 
 type Literal struct {
-	Value interface{}
+	Value any
 }
 
-func NewLiteral(value interface{}) *Literal {
+func NewLiteral(value any) *Literal {
 	return &Literal{
 		Value: value,
 	}
 }
 
-func (expr *Literal) Accept(v ExprVisitor) interface{} {
+func (expr *Literal) Accept(v ExprVisitor) any {
 	return v.VisitLiteralExpr(expr)
 }
 
 type Logical struct {
-	Left Expr
+	Left     Expr
 	Operator *Token
-	Right Expr
+	Right    Expr
 }
 
 func NewLogical(left Expr, operator *Token, right Expr) *Logical {
 	return &Logical{
-		Left: left,
+		Left:     left,
 		Operator: operator,
-		Right: right,
+		Right:    right,
 	}
 }
 
-func (expr *Logical) Accept(v ExprVisitor) interface{} {
+func (expr *Logical) Accept(v ExprVisitor) any {
 	return v.VisitLogicalExpr(expr)
 }
 
 type Set struct {
 	Object Expr
-	Name *Token
-	Value Expr
+	Name   *Token
+	Value  Expr
 }
 
 func NewSet(object Expr, name *Token, value Expr) *Set {
 	return &Set{
 		Object: object,
-		Name: name,
-		Value: value,
+		Name:   name,
+		Value:  value,
 	}
 }
 
-func (expr *Set) Accept(v ExprVisitor) interface{} {
+func (expr *Set) Accept(v ExprVisitor) any {
 	return v.VisitSetExpr(expr)
 }
 
 type Super struct {
 	Keyword *Token
-	Method *Token
+	Method  *Token
 }
 
 func NewSuper(keyword *Token, method *Token) *Super {
 	return &Super{
 		Keyword: keyword,
-		Method: method,
+		Method:  method,
 	}
 }
 
-func (expr *Super) Accept(v ExprVisitor) interface{} {
+func (expr *Super) Accept(v ExprVisitor) any {
 	return v.VisitSuperExpr(expr)
 }
 
@@ -177,23 +177,23 @@ func NewThis(keyword *Token) *This {
 	}
 }
 
-func (expr *This) Accept(v ExprVisitor) interface{} {
+func (expr *This) Accept(v ExprVisitor) any {
 	return v.VisitThisExpr(expr)
 }
 
 type Unary struct {
 	Operator *Token
-	Right Expr
+	Right    Expr
 }
 
 func NewUnary(operator *Token, right Expr) *Unary {
 	return &Unary{
 		Operator: operator,
-		Right: right,
+		Right:    right,
 	}
 }
 
-func (expr *Unary) Accept(v ExprVisitor) interface{} {
+func (expr *Unary) Accept(v ExprVisitor) any {
 	return v.VisitUnaryExpr(expr)
 }
 
@@ -207,7 +207,6 @@ func NewVariable(name *Token) *Variable {
 	}
 }
 
-func (expr *Variable) Accept(v ExprVisitor) interface{} {
+func (expr *Variable) Accept(v ExprVisitor) any {
 	return v.VisitVariableExpr(expr)
 }
-

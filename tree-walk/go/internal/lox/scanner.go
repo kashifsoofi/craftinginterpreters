@@ -237,7 +237,7 @@ func (s *Scanner) addToken(tokenType TokenType) {
 	s.addTokenWithLiteral(tokenType, nil)
 }
 
-func (s *Scanner) addTokenWithLiteral(tokenType TokenType, literal interface{}) {
+func (s *Scanner) addTokenWithLiteral(tokenType TokenType, literal any) {
 	text := string(s.source[s.start:s.current])
 	s.tokens = append(s.tokens, NewToken(tokenType, text, literal, s.line))
 }

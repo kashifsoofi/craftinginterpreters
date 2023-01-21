@@ -34,7 +34,7 @@ func main() {
 		"Call":     {"Callee Expr", "Paren *Token", "Arguments []Expr"},
 		"Get":      {"Object Expr", "Name *Token"},
 		"Grouping": {"Expression Expr"},
-		"Literal":  {"Value interface{}"},
+		"Literal":  {"Value any"},
 		"Logical":  {"Left Expr", "Operator *Token", "Right Expr"},
 		"Set":      {"Object Expr", "Name *Token", "Value Expr"},
 		"Super":    {"Keyword *Token", "Method *Token"},
@@ -84,7 +84,7 @@ func generateAst(outputDir, baseName string, typeNames []string, types map[strin
 	generateVisitor(f, baseName, typeNames)
 
 	fmt.Fprintf(f, "type %s interface {\n", baseName)
-	fmt.Fprintf(f, "\tAccept(v %sVisitor) interface{}\n", baseName)
+	fmt.Fprintf(f, "\tAccept(v %sVisitor) any\n", baseName)
 	fmt.Fprintf(f, "}\n")
 	fmt.Fprintln(f, "")
 
@@ -96,7 +96,7 @@ func generateAst(outputDir, baseName string, typeNames []string, types map[strin
 func generateVisitor(f *os.File, baseName string, typeNames []string) {
 	fmt.Fprintf(f, "type %sVisitor interface {\n", baseName)
 	for _, typeName := range typeNames {
-		fmt.Fprintf(f, "\tVisit%s%s(%s *%s) interface{}\n", typeName, baseName, strings.ToLower(baseName), typeName)
+		fmt.Fprintf(f, "\tVisit%s%s(%s *%s) any\n", typeName, baseName, strings.ToLower(baseName), typeName)
 	}
 	fmt.Fprintf(f, "}\n")
 	fmt.Fprintln(f, "")
@@ -129,7 +129,7 @@ func generateType(f *os.File, baseName, typeName string, fields []string) {
 	fmt.Fprintln(f, "")
 
 	// Assign
-	fmt.Fprintf(f, "func (%s *%s) Accept(v %sVisitor) interface{} {\n", strings.ToLower(baseName), typeName, baseName)
+	fmt.Fprintf(f, "func (%s *%s) Accept(v %sVisitor) any {\n", strings.ToLower(baseName), typeName, baseName)
 	fmt.Fprintf(f, "\treturn v.Visit%s%s(%s)\n", typeName, baseName, strings.ToLower(baseName))
 	fmt.Fprintln(f, "}")
 	fmt.Fprintln(f, "")

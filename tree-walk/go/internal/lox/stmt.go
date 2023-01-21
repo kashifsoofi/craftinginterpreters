@@ -1,19 +1,19 @@
 package lox
 
 type StmtVisitor interface {
-	VisitBlockStmt(stmt *Block) interface{}
-	VisitClassStmt(stmt *Class) interface{}
-	VisitExpressionStmt(stmt *Expression) interface{}
-	VisitFunctionStmt(stmt *Function) interface{}
-	VisitIfStmt(stmt *If) interface{}
-	VisitPrintStmt(stmt *Print) interface{}
-	VisitReturnStmt(stmt *Return) interface{}
-	VisitVarStmt(stmt *Var) interface{}
-	VisitWhileStmt(stmt *While) interface{}
+	VisitBlockStmt(stmt *Block) any
+	VisitClassStmt(stmt *Class) any
+	VisitExpressionStmt(stmt *Expression) any
+	VisitFunctionStmt(stmt *Function) any
+	VisitIfStmt(stmt *If) any
+	VisitPrintStmt(stmt *Print) any
+	VisitReturnStmt(stmt *Return) any
+	VisitVarStmt(stmt *Var) any
+	VisitWhileStmt(stmt *While) any
 }
 
 type Stmt interface {
-	Accept(v StmtVisitor) interface{}
+	Accept(v StmtVisitor) any
 }
 
 type Block struct {
@@ -26,7 +26,7 @@ func NewBlock(statements []Stmt) *Block {
 	}
 }
 
-func (stmt *Block) Accept(v StmtVisitor) interface{} {
+func (stmt *Block) Accept(v StmtVisitor) any {
 	return v.VisitBlockStmt(stmt)
 }
 
@@ -44,7 +44,7 @@ func NewClass(name *Token, superclass *Variable, methods []*Function) *Class {
 	}
 }
 
-func (stmt *Class) Accept(v StmtVisitor) interface{} {
+func (stmt *Class) Accept(v StmtVisitor) any {
 	return v.VisitClassStmt(stmt)
 }
 
@@ -58,7 +58,7 @@ func NewExpression(expression Expr) *Expression {
 	}
 }
 
-func (stmt *Expression) Accept(v StmtVisitor) interface{} {
+func (stmt *Expression) Accept(v StmtVisitor) any {
 	return v.VisitExpressionStmt(stmt)
 }
 
@@ -76,7 +76,7 @@ func NewFunction(name *Token, parameters []*Token, body []Stmt) *Function {
 	}
 }
 
-func (stmt *Function) Accept(v StmtVisitor) interface{} {
+func (stmt *Function) Accept(v StmtVisitor) any {
 	return v.VisitFunctionStmt(stmt)
 }
 
@@ -94,7 +94,7 @@ func NewIf(condition Expr, thenbranch Stmt, elsebranch Stmt) *If {
 	}
 }
 
-func (stmt *If) Accept(v StmtVisitor) interface{} {
+func (stmt *If) Accept(v StmtVisitor) any {
 	return v.VisitIfStmt(stmt)
 }
 
@@ -108,7 +108,7 @@ func NewPrint(expression Expr) *Print {
 	}
 }
 
-func (stmt *Print) Accept(v StmtVisitor) interface{} {
+func (stmt *Print) Accept(v StmtVisitor) any {
 	return v.VisitPrintStmt(stmt)
 }
 
@@ -124,7 +124,7 @@ func NewReturn(keyword *Token, value Expr) *Return {
 	}
 }
 
-func (stmt *Return) Accept(v StmtVisitor) interface{} {
+func (stmt *Return) Accept(v StmtVisitor) any {
 	return v.VisitReturnStmt(stmt)
 }
 
@@ -140,7 +140,7 @@ func NewVar(name *Token, initializer Expr) *Var {
 	}
 }
 
-func (stmt *Var) Accept(v StmtVisitor) interface{} {
+func (stmt *Var) Accept(v StmtVisitor) any {
 	return v.VisitVarStmt(stmt)
 }
 
@@ -156,6 +156,6 @@ func NewWhile(condition Expr, body Stmt) *While {
 	}
 }
 
-func (stmt *While) Accept(v StmtVisitor) interface{} {
+func (stmt *While) Accept(v StmtVisitor) any {
 	return v.VisitWhileStmt(stmt)
 }

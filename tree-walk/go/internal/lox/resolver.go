@@ -37,19 +37,19 @@ func (r *Resolver) Resolve(statements []Stmt) {
 	r.resolveStatements(statements)
 }
 
-func (r *Resolver) VisitAssignExpr(expr *Assign) interface{} {
+func (r *Resolver) VisitAssignExpr(expr *Assign) any {
 	r.resolveExpression(expr.Value)
 	r.resolveLocal(expr, expr.Name)
 	return nil
 }
 
-func (r *Resolver) VisitBinaryExpr(expr *Binary) interface{} {
+func (r *Resolver) VisitBinaryExpr(expr *Binary) any {
 	r.resolveExpression(expr.Left)
 	r.resolveExpression(expr.Right)
 	return nil
 }
 
-func (r *Resolver) VisitCallExpr(expr *Call) interface{} {
+func (r *Resolver) VisitCallExpr(expr *Call) any {
 	r.resolveExpression(expr.Callee)
 
 	for _, argument := range expr.Arguments {
@@ -59,33 +59,33 @@ func (r *Resolver) VisitCallExpr(expr *Call) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitGetExpr(expr *Get) interface{} {
+func (r *Resolver) VisitGetExpr(expr *Get) any {
 	r.resolveExpression(expr.Object)
 	return nil
 }
 
-func (r *Resolver) VisitGroupingExpr(expr *Grouping) interface{} {
+func (r *Resolver) VisitGroupingExpr(expr *Grouping) any {
 	r.resolveExpression(expr.Expression)
 	return nil
 }
 
-func (r *Resolver) VisitLiteralExpr(expr *Literal) interface{} {
+func (r *Resolver) VisitLiteralExpr(expr *Literal) any {
 	return nil
 }
 
-func (r *Resolver) VisitLogicalExpr(expr *Logical) interface{} {
+func (r *Resolver) VisitLogicalExpr(expr *Logical) any {
 	r.resolveExpression(expr.Left)
 	r.resolveExpression(expr.Right)
 	return nil
 }
 
-func (r *Resolver) VisitSetExpr(expr *Set) interface{} {
+func (r *Resolver) VisitSetExpr(expr *Set) any {
 	r.resolveExpression(expr.Value)
 	r.resolveExpression(expr.Object)
 	return nil
 }
 
-func (r *Resolver) VisitSuperExpr(expr *Super) interface{} {
+func (r *Resolver) VisitSuperExpr(expr *Super) any {
 	if r.currentClassType == classTypeNone {
 		newParseError(expr.Keyword, "Can't use 'super' outside of a class.")
 	} else if r.currentClassType != classTypeSubclass {
@@ -95,7 +95,7 @@ func (r *Resolver) VisitSuperExpr(expr *Super) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitThisExpr(expr *This) interface{} {
+func (r *Resolver) VisitThisExpr(expr *This) any {
 	if r.currentClassType == classTypeNone {
 		newParseError(expr.Keyword, "Can't use 'this' outside of a class.")
 		return nil
@@ -105,12 +105,12 @@ func (r *Resolver) VisitThisExpr(expr *This) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitUnaryExpr(expr *Unary) interface{} {
+func (r *Resolver) VisitUnaryExpr(expr *Unary) any {
 	r.resolveExpression(expr.Right)
 	return nil
 }
 
-func (r *Resolver) VisitVariableExpr(expr *Variable) interface{} {
+func (r *Resolver) VisitVariableExpr(expr *Variable) any {
 	if !r.scopes.empty() {
 		if declared, ok := r.scopes.peek()[expr.Name.Lexeme]; ok && !declared {
 			newParseError(expr.Name, "Can't read local variable in its own initializer.")
@@ -121,14 +121,14 @@ func (r *Resolver) VisitVariableExpr(expr *Variable) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitBlockStmt(stmt *Block) interface{} {
+func (r *Resolver) VisitBlockStmt(stmt *Block) any {
 	r.beginScope()
 	r.resolveStatements(stmt.Statements)
 	r.endScope()
 	return nil
 }
 
-func (r *Resolver) VisitClassStmt(stmt *Class) interface{} {
+func (r *Resolver) VisitClassStmt(stmt *Class) any {
 	enclosingClass := r.currentClassType
 	r.currentClassType = classTypeClass
 
@@ -171,12 +171,12 @@ func (r *Resolver) VisitClassStmt(stmt *Class) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitExpressionStmt(stmt *Expression) interface{} {
+func (r *Resolver) VisitExpressionStmt(stmt *Expression) any {
 	r.resolveExpression(stmt.Expression)
 	return nil
 }
 
-func (r *Resolver) VisitFunctionStmt(stmt *Function) interface{} {
+func (r *Resolver) VisitFunctionStmt(stmt *Function) any {
 	r.declare(stmt.Name)
 	r.define(stmt.Name)
 
@@ -184,7 +184,7 @@ func (r *Resolver) VisitFunctionStmt(stmt *Function) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitIfStmt(stmt *If) interface{} {
+func (r *Resolver) VisitIfStmt(stmt *If) any {
 	r.resolveExpression(stmt.Condition)
 	r.resolveStatement(stmt.ThenBranch)
 	if stmt.ElseBranch != nil {
@@ -193,12 +193,12 @@ func (r *Resolver) VisitIfStmt(stmt *If) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitPrintStmt(stmt *Print) interface{} {
+func (r *Resolver) VisitPrintStmt(stmt *Print) any {
 	r.resolveExpression(stmt.Expression)
 	return nil
 }
 
-func (r *Resolver) VisitReturnStmt(stmt *Return) interface{} {
+func (r *Resolver) VisitReturnStmt(stmt *Return) any {
 	if r.currentFunctionType == functionTypeNone {
 		newParseError(stmt.Keyword, "Can't return from top-level code.")
 	}
@@ -214,7 +214,7 @@ func (r *Resolver) VisitReturnStmt(stmt *Return) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitVarStmt(stmt *Var) interface{} {
+func (r *Resolver) VisitVarStmt(stmt *Var) any {
 	r.declare(stmt.Name)
 	if stmt.Initializer != nil {
 		r.resolveExpression(stmt.Initializer)
@@ -223,7 +223,7 @@ func (r *Resolver) VisitVarStmt(stmt *Var) interface{} {
 	return nil
 }
 
-func (r *Resolver) VisitWhileStmt(stmt *While) interface{} {
+func (r *Resolver) VisitWhileStmt(stmt *While) any {
 	r.resolveExpression(stmt.Condition)
 	r.resolveStatement(stmt.Body)
 	return nil
