@@ -52,15 +52,14 @@ class Program
                 break;
             }
             Run(line);
+
+            hadError = false;
+            hadRuntimeError = false;
         }
     }
 
     static void Run(string source)
     {
-        // Reset errors
-        hadError = false;
-        hadRuntimeError = false;
-
         var scanner = new Scanner(source);
         var tokens = scanner.ScanTokens();
         var parser = new Parser(tokens);
