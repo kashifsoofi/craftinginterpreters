@@ -33,5 +33,5 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line) {
 
 int addConstant(Chunk* chunk, Value value) {
     writeValueArray(&chunk->constants, value);
-    return chunk->constants.count;
+    return chunk->constants.count - 1;
 }
