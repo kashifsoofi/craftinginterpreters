@@ -66,6 +66,7 @@ static void errorAt(Token* token, const char* message) {
     if (token->type == TOKEN_EOF) {
         fprintf(stderr, " at end");
     } else if (token->type == TOKEN_ERROR) {
+    } else {
         fprintf(stderr, " at '%.*s'", token->length, token->start);
     }
 
@@ -187,7 +188,7 @@ static int resolveLocal(Compiler* compiler, Token* name) {
         Local* local = &compiler->locals[i];
         if (identifiersEqual(name, &local->name)) {
             if (local->depth == -1) {
-                error("Can't read local variable in it own initializer.");
+                error("Can't read local variable in its own initializer.");
             }
             return i;
         }
@@ -379,7 +380,7 @@ static void parsePrecedence(Precedence precedence) {
         return;
     }
 
-    bool canAssign = precedence >= PREC_ASSIGNMENT;
+    bool canAssign = precedence <= PREC_ASSIGNMENT;
     prefixRule(canAssign);
 
     while (precedence <= getRule(parser.current.type)->precedence) {
